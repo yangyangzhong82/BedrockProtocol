@@ -7,6 +7,12 @@ add_rules("mode.release", "mode.debug", "mode.releasedbg", "mode.minsizerel")
 
 set_policy("build.ccache", false)
 
+option("shared")
+    set_default(false)
+    set_showmenu(true)
+    set_description("Build Protocol as a shared library")
+option_end()
+
 -- ============================================================================
 -- Custom packages for the SculkCatalystMC git dependencies
 -- (these are not published to xrepo, so we vendor their build here)
@@ -51,10 +57,10 @@ add_requires("magic_enum v0.9.7")
 add_requires("sculk-reflection")
 
 -- ============================================================================
--- Protocol static library
+-- Protocol library (static by default, shared with `xmake f --shared=y`)
 -- ============================================================================
 target("Protocol")
-    set_kind("static")
+    set_kind(has_config("shared") and "shared" or "static")
     add_includedirs("include", {public = true})
 
     add_files("src/**.cpp")
