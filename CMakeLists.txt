@@ -142,20 +142,16 @@ if(PROTOCOL_ENABLE_CONNECTION)
             GIT_REPOSITORY https://github.com/madler/zlib.git
             GIT_TAG v1.3.2
         )
+        # zlib always defines a shared-library target on Windows.  Add it as an
+        # excluded subdirectory so that its install rules do not become part of
+        # Protocol's install target.  zlibstatic is still built transitively
+        # through PROTOCOL_ZLIB_TARGET below.
         FetchContent_MakeAvailable(zlib)
+        set_property(DIRECTORY "${zlib_SOURCE_DIR}" PROPERTY EXCLUDE_FROM_ALL TRUE)
 
         if(NOT TARGET zlibstatic)
             message(FATAL_ERROR "Static zlib target 'zlibstatic' was not generated. Static linking is required.")
         endif()
-
-        foreach(PROTOCOL_ZLIB_OPTIONAL_TARGET zlib example minigzip example64 minigzip64)
-            if(TARGET ${PROTOCOL_ZLIB_OPTIONAL_TARGET})
-                set_target_properties(${PROTOCOL_ZLIB_OPTIONAL_TARGET} PROPERTIES
-                    EXCLUDE_FROM_ALL TRUE
-                    EXCLUDE_FROM_DEFAULT_BUILD TRUE
-                )
-            endif()
-        endforeach()
 
         set(PROTOCOL_ZLIB_TARGET zlibstatic)
     endif()
