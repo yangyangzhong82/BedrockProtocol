@@ -283,6 +283,10 @@ else()
     )
 endif()
 
+if(PROTOCOL_ENABLE_CODEC OR PROTOCOL_ENABLE_AUTHENTICATION OR PROTOCOL_ENABLE_CONNECTION)
+    list(APPEND PROTOCOL_INSTALL_INCLUDE_DIRS "sculk/protocol/utility")
+endif()
+
 if(PROTOCOL_BUILD_TESTS)
     if(NOT PROTOCOL_ENABLE_CODEC)
         message(FATAL_ERROR "Protocol tests require PROTOCOL_ENABLE_CODEC=ON")
@@ -312,6 +316,10 @@ foreach(PROTOCOL_INCLUDE_DIR ${PROTOCOL_INSTALL_INCLUDE_DIRS})
         OPTIONAL
     )
 endforeach()
+
+install(FILES ${PROJECT_SOURCE_DIR}/include/sculk/protocol/Version.hpp
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/sculk/protocol
+)
 
 configure_package_config_file(
     ${PROJECT_SOURCE_DIR}/cmake/ProtocolConfig.cmake.in

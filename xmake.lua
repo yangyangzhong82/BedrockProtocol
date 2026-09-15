@@ -221,6 +221,8 @@ target("Protocol")
     end
 
     -- install headers for enabled features (mirror of CMake install dirs)
+    add_headerfiles("include/sculk/protocol/Version.hpp")
+    add_headerfiles("include/(sculk/protocol/utility/**)")
     if enable_codec then
         add_headerfiles("include/(sculk/protocol/codec/**)")
     end
