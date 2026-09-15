@@ -23,6 +23,7 @@ void MovePlayerPacket::write(BinaryStream& stream) const {
     stream.writeEnum(mPositionMode, &BinaryStream::writeByte);
     stream.writeBool(mOnGround);
     stream.writeUnsignedVarInt64(mRidingRuntimeId);
+    stream.writeBool(mPositionMode == PositionMode::Teleport);
     if (mPositionMode == PositionMode::Teleport) {
         stream.writeSignedInt(mTeleportationCause);
         stream.writeSignedInt(mSourceActorType);
@@ -38,7 +39,11 @@ Result<> MovePlayerPacket::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readEnum(mPositionMode, &ReadOnlyBinaryStream::readByte));
     _SCULK_READ(stream.readBool(mOnGround));
     _SCULK_READ(stream.readUnsignedVarInt64(mRidingRuntimeId));
-    if (mPositionMode == PositionMode::Teleport) {
+    bool hasTeleportData{};
+    _SCULK_READ(stream.readBool(hasTeleportData));
+    mTeleportationCause = 0;
+    mSourceActorType    = 0;
+    if (hasTeleportData) {
         _SCULK_READ(stream.readSignedInt(mTeleportationCause));
         _SCULK_READ(stream.readSignedInt(mSourceActorType));
     }

@@ -26,20 +26,22 @@ public:
     };
 
     struct ScoreInfo {
-        std::int64_t mScoreboardId{};
-        std::string  mObjectiveName{};
-        std::int32_t mScoreValue{};
-        IdentityType mIdentityType{};
-        std::int64_t mActorUniqueId{};
-        std::string  mFakePlayerName{};
+        std::int64_t               mScoreboardId{};
+        std::optional<std::string> mObjectiveName{};
+        std::int32_t               mScoreValue{};
+        IdentityType               mIdentityType{};
+        std::int64_t               mActorUniqueId{};
+        std::string                mFakePlayerName{};
 
-        void write(BinaryStream& stream, PacketType type) const;
+        void write(BinaryStream& stream, bool use26_44Format = false) const;
 
-        [[nodiscard]] Result<> read(ReadOnlyBinaryStream& stream, PacketType type);
+        [[nodiscard]] Result<> read(ReadOnlyBinaryStream& stream, bool use26_44Format = false);
     };
 
 public:
-    PacketType             mPacketType{};
+    // 26.44 uses a double optional for score removal despite sharing protocol 2168.
+    // Set this on both encoder and decoder when communicating with 26.44 clients.
+    bool                   mUse26_44Format{};
     std::vector<ScoreInfo> mScoresInfo{};
 
 public:

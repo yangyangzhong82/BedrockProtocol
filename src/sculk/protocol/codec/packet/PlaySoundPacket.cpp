@@ -21,6 +21,7 @@ void PlaySoundPacket::write(BinaryStream& stream) const {
     mPosition.write(stream);
     stream.writeFloat(mVolume);
     stream.writeFloat(mPitch);
+    stream.writeVarInt(mLoopCount);
     stream.writeOptional(mServerSoundHandle, &BinaryStream::writeUnsignedInt64);
 }
 
@@ -29,6 +30,7 @@ Result<> PlaySoundPacket::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(mPosition.read(stream));
     _SCULK_READ(stream.readFloat(mVolume));
     _SCULK_READ(stream.readFloat(mPitch));
+    _SCULK_READ(stream.readVarInt(mLoopCount));
     return stream.readOptional(mServerSoundHandle, &ReadOnlyBinaryStream::readUnsignedInt64);
 }
 
@@ -39,6 +41,7 @@ std::string PlaySoundPacket::toString() const {
         SCULK_FORMAT_FIELD(mPosition),
         SCULK_FORMAT_FIELD(mVolume),
         SCULK_FORMAT_FIELD(mPitch),
+        SCULK_FORMAT_FIELD(mLoopCount),
         SCULK_FORMAT_FIELD(mServerSoundHandle)
     );
 }

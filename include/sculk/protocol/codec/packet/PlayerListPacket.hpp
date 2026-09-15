@@ -14,13 +14,9 @@ namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
 class PlayerListPacket : public IPacket {
 public:
-    enum class ActionType : std::uint8_t {
-        Add    = 0,
-        Remove = 1,
-    };
+    using ActionType = PlayerListEntry::ActionType;
 
 public:
-    ActionType                   mAction{};
     std::vector<PlayerListEntry> mPlayerEntryList{};
 
 public:

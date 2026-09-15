@@ -10,58 +10,25 @@
 namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
 void RecipeIngredient::write(BinaryStream& stream) const {
-    stream.writeVariant(
-        mDescriptor,
-        &BinaryStream::writeByte,
-        Overload{
-            [&](const InternalItemDescriptor& descriptor) {
-                stream.writeSignedShort(descriptor.mId);
-                if (descriptor.mId != 0) {
-                    stream.writeSignedShort(descriptor.mAux);
-                }
-            },
-            [&](const MolangDescriptor& descriptor) {
-                stream.writeString(descriptor.mMolangFullName);
-                stream.writeByte(descriptor.mMolangVersion);
-            },
-            [&](const ItemTagDescriptor& descriptor) { stream.writeString(descriptor.mItemTag); },
-            [&](const DeferredDescriptor& descriptor) {
-                stream.writeString(descriptor.mDeferredFullName);
-                stream.writeUnsignedShort(descriptor.mAux);
-            },
-            [&](const ComplexAliasDescriptor& descriptor) { stream.writeString(descriptor.mName); },
-            [&](const std::monostate&) {}
-        }
-    );
+    stream.writeMap(mDescriptor, [](BinaryStream& stream, const std::string& key, const std::string& value) {
+        stream.writeString(key);
+        stream.writeString(value);
+    });
+    stream.writeVarInt(mAux);
     stream.writeVarInt(mStackSize);
 }
 
 Result<> RecipeIngredient::read(ReadOnlyBinaryStream& stream) {
-    _SCULK_READ(stream.readVariant(
-        mDescriptor,
-        &ReadOnlyBinaryStream::readByte,
-        Overload{
-            [&](InternalItemDescriptor& descriptor) {
-                _SCULK_READ(stream.readSignedShort(descriptor.mId));
-                if (descriptor.mId != 0) {
-                    _SCULK_READ(stream.readSignedShort(descriptor.mAux));
-                }
-                return Result<>{};
-            },
-            [&](MolangDescriptor& descriptor) {
-                _SCULK_READ(stream.readString(descriptor.mMolangFullName));
-                return stream.readByte(descriptor.mMolangVersion);
-            },
-            [&](ItemTagDescriptor& descriptor) { return stream.readString(descriptor.mItemTag); },
-            [&](DeferredDescriptor& descriptor) {
-                _SCULK_READ(stream.readString(descriptor.mDeferredFullName));
-                return stream.readUnsignedShort(descriptor.mAux);
-            },
-            [&](ComplexAliasDescriptor& descriptor) { return stream.readString(descriptor.mName); },
-            [&](std::monostate&) { return Result<>{}; }
-        }
-    ));
-    return stream.readVarInt(mStackSize);
+    _SCULK_READ(stream.readMap(mDescriptor, [](ReadOnlyBinaryStream& stream, std::string& key, std::string& value) {
+        _SCULK_READ(stream.readString(key));
+        return stream.readString(value);
+    }));
+    _SCULK_READ(stream.readVarInt(mAux));
+    _SCULK_READ(stream.readVarInt(mStackSize));
+    if (mAux < -32768 || mAux > 32767 || mStackSize < 0 || mStackSize > 65535) {
+        return error_utils::makeError("Recipe ingredient value out of range");
+    }
+    return {};
 }
 
 } // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE

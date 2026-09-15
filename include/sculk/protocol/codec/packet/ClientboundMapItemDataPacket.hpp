@@ -15,20 +15,19 @@ namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
 class ClientboundMapItemDataPacket : public IPacket {
 public:
-    std::int64_t                         mMapId{};
-    ClientboundMapItemDataType           mTypeFlag{};
-    std::uint8_t                         mDimension{};
-    bool                                 mIsLockedMap{};
-    BlockPos                             mMapOrigin{};
-    std::vector<std::int64_t>            mMapEntries{};
-    std::uint8_t                         mScale{};
-    std::vector<MapTrackedActorUniqueId> mTrackedActors{};
-    std::vector<MapDecoration>           mDecorationList{};
-    std::int32_t                         mTextureWidth{};
-    std::int32_t                         mTextureHeight{};
-    std::int32_t                         mXTexCoordinate{};
-    std::int32_t                         mYTexCoordinate{};
-    std::vector<std::uint32_t>           mPixels{};
+    std::int64_t                                        mMapId{};
+    std::uint8_t                                        mDimension{};
+    bool                                                mIsLockedMap{};
+    BlockPos                                            mMapOrigin{};
+    std::optional<std::vector<std::int64_t>>            mMapEntries{};
+    std::optional<std::uint8_t>                         mScale{};
+    std::optional<std::vector<MapTrackedActorUniqueId>> mTrackedActors{};
+    std::optional<std::vector<MapDecoration>>           mDecorationList{};
+    std::optional<std::int32_t>                         mTextureWidth{};
+    std::optional<std::int32_t>                         mTextureHeight{};
+    std::optional<std::int32_t>                         mXTexCoordinate{};
+    std::optional<std::int32_t>                         mYTexCoordinate{};
+    std::optional<std::vector<std::uint32_t>>           mPixels{};
 
 public:
     [[nodiscard]] MinecraftPacketIds getId() const noexcept override;

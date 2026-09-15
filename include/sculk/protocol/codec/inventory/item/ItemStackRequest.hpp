@@ -16,6 +16,41 @@
 
 namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
+struct ItemStackRequestItemDescriptor {
+    struct ItemName {
+        std::string  mName{};
+        std::int32_t mAux{};
+    };
+    struct Molang {
+        std::string  mExpression{};
+        std::int16_t mVersion{};
+    };
+    struct ItemTag {
+        std::string mTag{};
+    };
+    using Variant = std::variant<std::monostate, ItemName, Molang, ItemTag>;
+    Variant mDescriptor{};
+
+    void                   write(BinaryStream& stream) const;
+    [[nodiscard]] Result<> read(ReadOnlyBinaryStream& stream);
+};
+
+struct ItemStackRequestIngredient {
+    ItemStackRequestItemDescriptor mItemDescriptor{};
+    std::uint16_t                  mStackSize{};
+    void                           write(BinaryStream& stream) const;
+    [[nodiscard]] Result<>         read(ReadOnlyBinaryStream& stream);
+};
+
+struct ItemStackRequestItem {
+    ItemStackRequestItemDescriptor mItemDescriptor{};
+    std::uint16_t                  mStackSize{};
+    std::uint32_t                  mBlockRuntimeId{};
+    std::string                    mUserData{};
+    void                           write(BinaryStream& stream) const;
+    [[nodiscard]] Result<>         read(ReadOnlyBinaryStream& stream);
+};
+
 struct ItemStackRequestSlotInfo {
     FullContainerName mFullContainerName{};
     std::uint8_t      mSlot{};
@@ -95,14 +130,13 @@ struct ItemStackRequestAction {
 
     struct CraftRecipe {
         std::uint32_t mRecipeNetworkIdOrCreativeId{};
-        std::uint32_t mTimesCrafted{};
+        std::uint8_t  mTimesCrafted{};
     };
 
     struct CraftRecipeAuto {
-        std::uint32_t                 mRecipeNetworkId{};
-        std::uint8_t                  mNumberOfRequestedCrafts{};
-        std::uint8_t                  mTimesCrafted{};
-        std::vector<RecipeIngredient> mIngredients{};
+        std::uint32_t                           mRecipeNetworkId{};
+        std::uint8_t                            mNumberOfRequestedCrafts{};
+        std::vector<ItemStackRequestIngredient> mIngredients{};
     };
 
     struct CraftRecipeOptional {
@@ -122,8 +156,8 @@ struct ItemStackRequestAction {
     };
 
     struct CraftResult {
-        std::vector<NetworkItemInstanceDescriptor> mCraftResults{};
-        std::uint8_t                               mTimesCrafted{};
+        std::vector<ItemStackRequestItem> mCraftResults{};
+        std::uint8_t                      mTimesCrafted{};
     };
 
     struct OnlyType {};

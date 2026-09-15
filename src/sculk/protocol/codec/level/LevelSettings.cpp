@@ -22,7 +22,7 @@ void LevelSettings::write(BinaryStream& stream) const {
     stream.writeBool(mIsCreatedInEditor);
     stream.writeBool(mIsExportedFromEditor);
     stream.writeVarInt(mDayCycleStopTime);
-    stream.writeVarInt(mEduOffer);
+    stream.writeUnsignedVarInt(mEduOffer);
     stream.writeBool(mIsEdu);
     stream.writeString(mEduProductId);
     stream.writeFloat(mRainLevel);
@@ -34,11 +34,11 @@ void LevelSettings::write(BinaryStream& stream) const {
     stream.writeVarInt(mPlatformBroadcastSetting);
     stream.writeBool(mCommandsEnabled);
     stream.writeBool(mTextureRequired);
-    stream.writeArray(mGameRules, &GameRuleData::writeLevelSettings);
+    stream.writeArray(mGameRules, &GameRuleData::write);
     mExperiments.write(stream);
     stream.writeBool(mBonusChest);
     stream.writeBool(mStartsWithMap);
-    stream.writeEnum(mPlayerPermission, &BinaryStream::writeVarInt);
+    stream.writeEnum(mPlayerPermission, &BinaryStream::writeByte);
     stream.writeSignedInt(mTickRange);
     stream.writeBool(mLockBehaviorPack);
     stream.writeBool(mLockResourcePack);
@@ -56,7 +56,7 @@ void LevelSettings::write(BinaryStream& stream) const {
     stream.writeBool(mNetherType);
     stream.writeString(mEduResourceButtonName);
     stream.writeString(mEduResourceUri);
-    stream.writeBool(mForceExperimentalGameplay);
+    stream.writeOptional(mForceExperimentalGameplay, &BinaryStream::writeBool);
     stream.writeByte(mChatRestrictionLevel);
     stream.writeBool(mDisablePlayerInteractions);
     stream.writeVarInt(mServerEditorConnectionPolicy);
@@ -76,7 +76,7 @@ Result<> LevelSettings::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readBool(mIsCreatedInEditor));
     _SCULK_READ(stream.readBool(mIsExportedFromEditor));
     _SCULK_READ(stream.readVarInt(mDayCycleStopTime));
-    _SCULK_READ(stream.readVarInt(mEduOffer));
+    _SCULK_READ(stream.readUnsignedVarInt(mEduOffer));
     _SCULK_READ(stream.readBool(mIsEdu));
     _SCULK_READ(stream.readString(mEduProductId));
     _SCULK_READ(stream.readFloat(mRainLevel));
@@ -88,11 +88,11 @@ Result<> LevelSettings::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readVarInt(mPlatformBroadcastSetting));
     _SCULK_READ(stream.readBool(mCommandsEnabled));
     _SCULK_READ(stream.readBool(mTextureRequired));
-    _SCULK_READ(stream.readArray(mGameRules, &GameRuleData::readLevelSettings));
+    _SCULK_READ(stream.readArray(mGameRules, &GameRuleData::read));
     _SCULK_READ(mExperiments.read(stream));
     _SCULK_READ(stream.readBool(mBonusChest));
     _SCULK_READ(stream.readBool(mStartsWithMap));
-    _SCULK_READ(stream.readEnum(mPlayerPermission, &ReadOnlyBinaryStream::readVarInt));
+    _SCULK_READ(stream.readEnum(mPlayerPermission, &ReadOnlyBinaryStream::readByte));
     _SCULK_READ(stream.readSignedInt(mTickRange));
     _SCULK_READ(stream.readBool(mLockBehaviorPack));
     _SCULK_READ(stream.readBool(mLockResourcePack));
@@ -110,7 +110,7 @@ Result<> LevelSettings::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readBool(mNetherType));
     _SCULK_READ(stream.readString(mEduResourceButtonName));
     _SCULK_READ(stream.readString(mEduResourceUri));
-    _SCULK_READ(stream.readBool(mForceExperimentalGameplay));
+    _SCULK_READ(stream.readOptional(mForceExperimentalGameplay, &ReadOnlyBinaryStream::readBool));
     _SCULK_READ(stream.readByte(mChatRestrictionLevel));
     _SCULK_READ(stream.readBool(mDisablePlayerInteractions));
     _SCULK_READ(stream.readVarInt(mServerEditorConnectionPolicy));

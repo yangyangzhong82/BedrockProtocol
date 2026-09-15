@@ -174,6 +174,10 @@ Result<> ClientProperties::sign(const PemKeyPair& clientKeyPair) {
     SCULK_CLIENT_PROPERTIES_SERIALIZE(payload, mSkinImageHeight);
     SCULK_CLIENT_PROPERTIES_SERIALIZE(payload, mSkinImageWidth);
     SCULK_CLIENT_PROPERTIES_SERIALIZE(payload, mSkinResourcePatch);
+    SCULK_CLIENT_PROPERTIES_SERIALIZE(payload, mProfileHash);
+    if (payload.mNonce) {
+        SCULK_CLIENT_PROPERTIES_SERIALIZE(payload, mNonce);
+    }
     SCULK_CLIENT_PROPERTIES_SERIALIZE(payload, mThirdPartyName);
     SCULK_CLIENT_PROPERTIES_SERIALIZE(payload, mTrustedSkin);
     SCULK_CLIENT_PROPERTIES_SERIALIZE(payload, mUIProfile);
@@ -254,6 +258,8 @@ Result<ClientProperties> ClientProperties::fromString(std::string_view rawClient
     SCULK_CLIENT_PROPERTIES_DESERIALIZE_REQUIRED(payload, mSkinImageHeight);
     SCULK_CLIENT_PROPERTIES_DESERIALIZE_REQUIRED(payload, mSkinImageWidth);
     SCULK_CLIENT_PROPERTIES_DESERIALIZE_REQUIRED(payload, mSkinResourcePatch);
+    SCULK_CLIENT_PROPERTIES_DESERIALIZE_OPTIONAL(payload, mProfileHash);
+    SCULK_CLIENT_PROPERTIES_DESERIALIZE_OPTIONAL(payload, mNonce);
     SCULK_CLIENT_PROPERTIES_DESERIALIZE_REQUIRED(payload, mThirdPartyName);
     SCULK_CLIENT_PROPERTIES_DESERIALIZE_REQUIRED(payload, mTrustedSkin);
     SCULK_CLIENT_PROPERTIES_DESERIALIZE_REQUIRED(payload, mUIProfile);

@@ -1,6 +1,6 @@
 # 📄 Protocol
 
-![Protocol Version](https://img.shields.io/badge/Bedrock-v1001%20%7C%2026.30-30ffee?style=flat-square)   
+![Protocol Version](https://img.shields.io/badge/Bedrock-v2168%20%7C%2026.40-30ffee?style=flat-square)
 
 ![C++23](https://img.shields.io/badge/C%2B%2B-23-blue)
 ![CMake](https://img.shields.io/badge/CMake-3.20%2B-064f8c)
@@ -9,6 +9,8 @@
 [📄 中文文档](README.zh.md)
 
 A C++23 Minecraft Bedrock network protocol library.
+
+[Protocol 2168 migration notes and validation (Chinese)](PROTOCOL_2168.md)
 
 Protocol provides Bedrock packet models, packet ID mapping, and binary
 read/write utilities for building high-performance servers, proxies,
@@ -127,7 +129,7 @@ int main() {
 ## 🧬 ABI Namespace
 
 Public APIs are versioned with an inline ABI namespace,
-for example `sculk::protocol::abi_v1001`.
+for example `sculk::protocol::abi_v2168`.
 
 ## 🤝 Contributing
 

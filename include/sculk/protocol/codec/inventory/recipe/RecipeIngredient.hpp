@@ -8,48 +8,18 @@
 #pragma once
 #include "sculk/protocol/utility/BinaryStream.hpp"
 #include "sculk/protocol/utility/ReadOnlyBinaryStream.hpp"
+#include <map>
 #include <string>
-#include <variant>
 
 namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
-struct InternalItemDescriptor {
-    std::int16_t mId{};
-    std::int16_t mAux{};
-};
-
-struct MolangDescriptor {
-    std::string  mMolangFullName{};
-    std::uint8_t mMolangVersion{};
-};
-
-struct ItemTagDescriptor {
-    std::string mItemTag{};
-};
-
-struct DeferredDescriptor {
-    std::string   mDeferredFullName{};
-    std::uint16_t mAux{};
-};
-
-struct ComplexAliasDescriptor {
-    std::string mName{};
-};
-
+// CraftingData uses the descriptor's string map, followed by aux and count.
 struct RecipeIngredient {
-    using DescriptorVariant = std::variant<
-        std::monostate,
-        InternalItemDescriptor,
-        MolangDescriptor,
-        ItemTagDescriptor,
-        DeferredDescriptor,
-        ComplexAliasDescriptor>;
+    std::map<std::string, std::string> mDescriptor{};
+    std::int32_t                       mAux{32767};
+    std::int32_t                       mStackSize{};
 
-    DescriptorVariant mDescriptor{};
-    std::int32_t      mStackSize{};
-
-    void write(BinaryStream& stream) const;
-
+    void                   write(BinaryStream& stream) const;
     [[nodiscard]] Result<> read(ReadOnlyBinaryStream& stream);
 };
 

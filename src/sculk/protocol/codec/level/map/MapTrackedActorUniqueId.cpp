@@ -11,28 +11,14 @@ namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
 void MapTrackedActorUniqueId::write(BinaryStream& stream) const {
     stream.writeEnum(mType, &BinaryStream::writeSignedInt);
-    switch (mType) {
-    case Type::Entity:
-        stream.writeVarInt64(mActorUniqueId);
-        break;
-    case Type::BlockEntity:
-        mBlockPosition.write(stream);
-        break;
-    default:
-        break;
-    }
+    stream.writeOptional(mActorUniqueId, &BinaryStream::writeVarInt64);
+    stream.writeOptional(mBlockPosition, &BlockPos::write);
 }
 
 Result<> MapTrackedActorUniqueId::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readEnum(mType, &ReadOnlyBinaryStream::readSignedInt));
-    switch (mType) {
-    case Type::Entity:
-        return stream.readVarInt64(mActorUniqueId);
-    case Type::BlockEntity:
-        return mBlockPosition.read(stream);
-    default:
-        return {};
-    }
+    _SCULK_READ(stream.readOptional(mActorUniqueId, &ReadOnlyBinaryStream::readVarInt64));
+    return stream.readOptional(mBlockPosition, &BlockPos::read);
 }
 
 } // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE

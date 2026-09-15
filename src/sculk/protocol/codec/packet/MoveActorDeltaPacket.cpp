@@ -29,47 +29,91 @@ std::string_view MoveActorDeltaPacket::getName() const noexcept { return "MoveAc
 
 void MoveActorDeltaPacket::write(BinaryStream& stream) const {
     stream.writeUnsignedVarInt64(mActorRuntimeId);
-    stream.writeUnsignedShort(mHeader);
+    stream.writeBool((mHeader & HasX) != 0);
     if ((mHeader & HasX) != 0) {
         stream.writeFloat(mNewPosX);
     }
+    stream.writeBool((mHeader & HasY) != 0);
     if ((mHeader & HasY) != 0) {
         stream.writeFloat(mNewPosY);
     }
+    stream.writeBool((mHeader & HasZ) != 0);
     if ((mHeader & HasZ) != 0) {
         stream.writeFloat(mNewPosZ);
     }
+    stream.writeBool((mHeader & HasPitch) != 0);
     if ((mHeader & HasPitch) != 0) {
         stream.writeByte(mRotationXByteAngle);
     }
+    stream.writeBool((mHeader & HasYaw) != 0);
     if ((mHeader & HasYaw) != 0) {
         stream.writeByte(mRotationYByteAngle);
     }
+    stream.writeBool((mHeader & HasHeadYaw) != 0);
     if ((mHeader & HasHeadYaw) != 0) {
         stream.writeByte(mRotationYHeaderByteAngle);
     }
+    stream.writeBool((mHeader & (1u << 6)) != 0);
+    stream.writeBool((mHeader & (1u << 7)) != 0);
+    stream.writeBool((mHeader & (1u << 8)) != 0);
+    stream.writeBool((mHeader & (1u << 9)) != 0);
 }
 
 Result<> MoveActorDeltaPacket::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readUnsignedVarInt64(mActorRuntimeId));
-    _SCULK_READ(stream.readUnsignedShort(mHeader));
-    if ((mHeader & HasX) != 0) {
+    mHeader = 0;
+    bool present{};
+    mNewPosX = 0;
+    _SCULK_READ(stream.readBool(present));
+    if (present) {
+        mHeader |= HasX;
         _SCULK_READ(stream.readFloat(mNewPosX));
     }
-    if ((mHeader & HasY) != 0) {
+    mNewPosY = 0;
+    _SCULK_READ(stream.readBool(present));
+    if (present) {
+        mHeader |= HasY;
         _SCULK_READ(stream.readFloat(mNewPosY));
     }
-    if ((mHeader & HasZ) != 0) {
+    mNewPosZ = 0;
+    _SCULK_READ(stream.readBool(present));
+    if (present) {
+        mHeader |= HasZ;
         _SCULK_READ(stream.readFloat(mNewPosZ));
     }
-    if ((mHeader & HasPitch) != 0) {
+    mRotationXByteAngle = 0;
+    _SCULK_READ(stream.readBool(present));
+    if (present) {
+        mHeader |= HasPitch;
         _SCULK_READ(stream.readByte(mRotationXByteAngle));
     }
-    if ((mHeader & HasYaw) != 0) {
+    mRotationYByteAngle = 0;
+    _SCULK_READ(stream.readBool(present));
+    if (present) {
+        mHeader |= HasYaw;
         _SCULK_READ(stream.readByte(mRotationYByteAngle));
     }
-    if ((mHeader & HasHeadYaw) != 0) {
+    mRotationYHeaderByteAngle = 0;
+    _SCULK_READ(stream.readBool(present));
+    if (present) {
+        mHeader |= HasHeadYaw;
         _SCULK_READ(stream.readByte(mRotationYHeaderByteAngle));
+    }
+    _SCULK_READ(stream.readBool(present));
+    if (present) {
+        mHeader |= (1u << 6);
+    }
+    _SCULK_READ(stream.readBool(present));
+    if (present) {
+        mHeader |= (1u << 7);
+    }
+    _SCULK_READ(stream.readBool(present));
+    if (present) {
+        mHeader |= (1u << 8);
+    }
+    _SCULK_READ(stream.readBool(present));
+    if (present) {
+        mHeader |= (1u << 9);
     }
     return {};
 }

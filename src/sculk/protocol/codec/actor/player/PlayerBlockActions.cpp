@@ -22,11 +22,11 @@ Result<> PlayerBlockActionData::read(ReadOnlyBinaryStream& stream) {
 }
 
 void PlayerBlockActions::write(BinaryStream& stream) const {
-    stream.writeArray(mActions, &BinaryStream::writeVarInt, &PlayerBlockActionData::write);
+    stream.writeArray(mActions, &PlayerBlockActionData::write);
 }
 
 Result<> PlayerBlockActions::read(ReadOnlyBinaryStream& stream) {
-    return stream.readArray(mActions, &ReadOnlyBinaryStream::readVarInt, &PlayerBlockActionData::read);
+    return stream.readArray(mActions, &PlayerBlockActionData::read);
 }
 
 } // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE

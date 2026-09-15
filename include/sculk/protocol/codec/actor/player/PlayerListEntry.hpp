@@ -12,6 +12,8 @@
 namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
 struct PlayerListEntry {
+    enum class ActionType : std::uint8_t { Add = 0, Remove = 1 };
+    ActionType     mAction{};
     UUID           mUUID{};
     std::int64_t   mActorUniqueId{};
     std::string    mPlayerName{};
@@ -23,7 +25,6 @@ struct PlayerListEntry {
     bool           mIsHost{};
     bool           mIsSubClient{};
     std::int32_t   mColor{};
-    bool           mSkinTrusted{};
 
     void write(BinaryStream& stream) const;
 

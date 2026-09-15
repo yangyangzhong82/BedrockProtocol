@@ -13,7 +13,14 @@ namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
 class CraftingDataPacket : public IPacket {
 public:
-    std::vector<CraftingDataEntry>        mCraftingDataEntries{};
+    std::vector<ShapedRecipe>             mShapedRecipes{};
+    std::vector<ShapelessRecipe>          mShapelessRecipes{};
+    std::vector<MultiRecipe>              mMultiRecipes{};
+    std::vector<UserDataShapelessRecipe>  mUserDataShapelessRecipes{};
+    std::vector<ShapelessChemistryRecipe> mShapelessChemistryRecipes{};
+    std::vector<ShapedChemistryRecipe>    mShapedChemistryRecipes{};
+    std::vector<SmithingTransformRecipe>  mSmithingTransformRecipes{};
+    std::vector<SmithingTrimRecipe>       mSmithingTrimRecipes{};
     std::vector<PotionMixDataEntry>       mPotionMixDataEntries{};
     std::vector<ContainerMixDataEntry>    mContainerMixDataEntries{};
     std::vector<MaterialReducerDataEntry> mMaterialReducerDataEntries{};

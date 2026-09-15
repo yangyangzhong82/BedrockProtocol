@@ -9,19 +9,90 @@
 
 namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
+void ItemStackRequestItemDescriptor::write(BinaryStream& stream) const {
+    stream.writeUnsignedVarInt(static_cast<std::uint32_t>(mDescriptor.index()));
+    stream.writeVariant(
+        mDescriptor,
+        &BinaryStream::writeByte,
+        Overload{
+            [](std::monostate) {},
+            [&](const ItemName& item) {
+                stream.writeString(item.mName);
+                stream.writeVarInt(item.mAux);
+            },
+            [&](const Molang& item) {
+                stream.writeString(item.mExpression);
+                stream.writeSignedShort(item.mVersion);
+            },
+            [&](const ItemTag& item) { stream.writeString(item.mTag); }
+        }
+    );
+}
+
+Result<> ItemStackRequestItemDescriptor::read(ReadOnlyBinaryStream& stream) {
+    std::uint32_t variant{};
+    _SCULK_READ(stream.readUnsignedVarInt(variant));
+    _SCULK_READ(stream.readVariant(
+        mDescriptor,
+        &ReadOnlyBinaryStream::readByte,
+        Overload{
+            [](std::monostate&) { return Result<>{}; },
+            [&](ItemName& item) {
+                _SCULK_READ(stream.readString(item.mName));
+                return stream.readVarInt(item.mAux);
+            },
+            [&](Molang& item) {
+                _SCULK_READ(stream.readString(item.mExpression));
+                return stream.readSignedShort(item.mVersion);
+            },
+            [&](ItemTag& item) { return stream.readString(item.mTag); }
+        }
+    ));
+    if (variant != mDescriptor.index()) {
+        return error_utils::makeError("Mismatched stack request item descriptor");
+    }
+    return {};
+}
+
+void ItemStackRequestIngredient::write(BinaryStream& stream) const {
+    mItemDescriptor.write(stream);
+    stream.writeUnsignedShort(mStackSize);
+}
+
+Result<> ItemStackRequestIngredient::read(ReadOnlyBinaryStream& stream) {
+    _SCULK_READ(mItemDescriptor.read(stream));
+    return stream.readUnsignedShort(mStackSize);
+}
+
+void ItemStackRequestItem::write(BinaryStream& stream) const {
+    mItemDescriptor.write(stream);
+    stream.writeUnsignedShort(mStackSize);
+    stream.writeUnsignedVarInt(mBlockRuntimeId);
+    stream.writeString(mUserData);
+}
+
+Result<> ItemStackRequestItem::read(ReadOnlyBinaryStream& stream) {
+    _SCULK_READ(mItemDescriptor.read(stream));
+    _SCULK_READ(stream.readUnsignedShort(mStackSize));
+    _SCULK_READ(stream.readUnsignedVarInt(mBlockRuntimeId));
+    return stream.readString(mUserData);
+}
+
 void ItemStackRequestSlotInfo::write(BinaryStream& stream) const {
     mFullContainerName.write(stream);
     stream.writeByte(mSlot);
-    stream.writeVarInt(mNetId);
+    stream.writeSignedInt(mNetId);
 }
 
 Result<> ItemStackRequestSlotInfo::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(mFullContainerName.read(stream));
     _SCULK_READ(stream.readByte(mSlot));
-    return stream.readVarInt(mNetId);
+    return stream.readSignedInt(mNetId);
 }
 
 void ItemStackRequestAction::write(BinaryStream& stream) const {
+    const auto type = static_cast<std::uint32_t>(mActionType);
+    stream.writeUnsignedVarInt(type > 8 ? type - 2 : type);
     stream.writeEnum(mActionType, &BinaryStream::writeByte);
     std::visit(
         Overload{
@@ -51,26 +122,23 @@ void ItemStackRequestAction::write(BinaryStream& stream) const {
             [&](const MineBlock& data) {
                 stream.writeVarInt(data.mSlot);
                 stream.writeVarInt(data.mPredictedDurability);
-                if (data.mPreValidationStatus == MineBlock::PreValidationStatus::Valid && data.mItemStackNetId != 0) {
-                    stream.writeVarInt(data.mItemStackNetId);
-                }
+                stream.writeSignedInt(data.mItemStackNetId);
             },
             [&](const CraftRecipe& data) {
                 stream.writeUnsignedVarInt(data.mRecipeNetworkIdOrCreativeId);
-                stream.writeUnsignedVarInt(data.mTimesCrafted);
+                stream.writeByte(data.mTimesCrafted);
             },
             [&](const CraftRecipeAuto& data) {
                 stream.writeUnsignedVarInt(data.mRecipeNetworkId);
                 stream.writeByte(data.mNumberOfRequestedCrafts);
-                stream.writeByte(data.mTimesCrafted);
-                stream.writeArray(data.mIngredients, &BinaryStream::writeByte, &RecipeIngredient::write);
+                stream.writeArray(data.mIngredients, &ItemStackRequestIngredient::write);
             },
             [&](const CraftRecipeOptional& data) {
                 stream.writeUnsignedVarInt(data.mRecipeNetId);
                 stream.writeUnsignedInt(data.mFilteredStringIndex);
             },
             [&](const CraftGrindStone& data) {
-                stream.writeUnsignedVarInt(data.mItemStackNetId);
+                stream.writeUnsignedInt(data.mItemStackNetId);
                 stream.writeByte(data.mTimesCrafted);
                 stream.writeVarInt(data.mRepairCost);
             },
@@ -79,7 +147,7 @@ void ItemStackRequestAction::write(BinaryStream& stream) const {
                 stream.writeByte(data.mTimesCrafted);
             },
             [&](const CraftResult& data) {
-                stream.writeArray(data.mCraftResults, &NetworkItemInstanceDescriptor::write);
+                stream.writeArray(data.mCraftResults, &ItemStackRequestItem::write);
                 stream.writeByte(data.mTimesCrafted);
             },
             [&](const OnlyType&) {}
@@ -89,7 +157,13 @@ void ItemStackRequestAction::write(BinaryStream& stream) const {
 }
 
 Result<> ItemStackRequestAction::read(ReadOnlyBinaryStream& stream) {
+    std::uint32_t variant{};
+    _SCULK_READ(stream.readUnsignedVarInt(variant));
     _SCULK_READ(stream.readEnum(mActionType, &ReadOnlyBinaryStream::readByte));
+    const auto type = static_cast<std::uint32_t>(mActionType);
+    if (type > 19 || type == 7 || type == 8 || variant != (type > 8 ? type - 2 : type)) {
+        return error_utils::makeError("Invalid stack request action variant");
+    }
     switch (mActionType) {
     case Type::Take:
     case Type::Place: {
@@ -140,7 +214,7 @@ Result<> ItemStackRequestAction::read(ReadOnlyBinaryStream& stream) {
         MineBlock data{};
         _SCULK_READ(stream.readVarInt(data.mSlot));
         _SCULK_READ(stream.readVarInt(data.mPredictedDurability));
-        _SCULK_READ(stream.readVarInt(data.mItemStackNetId));
+        _SCULK_READ(stream.readSignedInt(data.mItemStackNetId));
         data.mPreValidationStatus =
             data.mItemStackNetId == 0 ? MineBlock::PreValidationStatus::Invalid : MineBlock::PreValidationStatus::Valid;
         mVariant = std::move(data);
@@ -150,7 +224,7 @@ Result<> ItemStackRequestAction::read(ReadOnlyBinaryStream& stream) {
     case Type::CraftCreative: {
         CraftRecipe data{};
         _SCULK_READ(stream.readUnsignedVarInt(data.mRecipeNetworkIdOrCreativeId));
-        _SCULK_READ(stream.readUnsignedVarInt(data.mTimesCrafted));
+        _SCULK_READ(stream.readByte(data.mTimesCrafted));
         mVariant = std::move(data);
         return {};
     }
@@ -158,8 +232,7 @@ Result<> ItemStackRequestAction::read(ReadOnlyBinaryStream& stream) {
         CraftRecipeAuto data{};
         _SCULK_READ(stream.readUnsignedVarInt(data.mRecipeNetworkId));
         _SCULK_READ(stream.readByte(data.mNumberOfRequestedCrafts));
-        _SCULK_READ(stream.readByte(data.mTimesCrafted));
-        _SCULK_READ(stream.readArray(data.mIngredients, &ReadOnlyBinaryStream::readByte, &RecipeIngredient::read));
+        _SCULK_READ(stream.readArray(data.mIngredients, &ItemStackRequestIngredient::read));
         mVariant = std::move(data);
         return {};
     }
@@ -172,7 +245,7 @@ Result<> ItemStackRequestAction::read(ReadOnlyBinaryStream& stream) {
     }
     case Type::CraftGrindStone: {
         CraftGrindStone data{};
-        _SCULK_READ(stream.readUnsignedVarInt(data.mItemStackNetId));
+        _SCULK_READ(stream.readUnsignedInt(data.mItemStackNetId));
         _SCULK_READ(stream.readByte(data.mTimesCrafted));
         _SCULK_READ(stream.readVarInt(data.mRepairCost));
         mVariant = std::move(data);
@@ -187,14 +260,17 @@ Result<> ItemStackRequestAction::read(ReadOnlyBinaryStream& stream) {
     }
     case Type::CraftResults: {
         CraftResult data{};
-        _SCULK_READ(stream.readArray(data.mCraftResults, &NetworkItemInstanceDescriptor::read));
+        _SCULK_READ(stream.readArray(data.mCraftResults, &ItemStackRequestItem::read));
         _SCULK_READ(stream.readByte(data.mTimesCrafted));
         mVariant = std::move(data);
         return {};
     }
-    default:
+    case Type::LabTableCombine:
+    case Type::CraftNonImplemented:
         mVariant = OnlyType{};
         return {};
+    default:
+        return error_utils::makeError("Unknown stack request action");
     }
 }
 

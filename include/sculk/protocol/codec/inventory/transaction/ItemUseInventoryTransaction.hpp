@@ -59,6 +59,10 @@ public:
 
     [[nodiscard]] Result<> read(ReadOnlyBinaryStream& stream);
 
+    void writeWithoutActions(BinaryStream& stream) const;
+
+    [[nodiscard]] Result<> readWithoutActions(ReadOnlyBinaryStream& stream);
+
     void writeLegacy(BinaryStream& stream) const;
 
     [[nodiscard]] Result<> readLegacy(ReadOnlyBinaryStream& stream);

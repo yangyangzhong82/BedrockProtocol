@@ -12,9 +12,7 @@
 namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
 struct PresenceConfiguration {
-    std::optional<std::string> mExperienceName{};
-    std::optional<std::string> mWorldName{};
-    std::string                mRichPresenceId{};
+    std::optional<std::string> mRichPresenceId{};
 
     void write(BinaryStream& stream) const;
 

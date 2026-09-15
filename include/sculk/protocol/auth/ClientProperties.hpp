@@ -88,6 +88,8 @@ public:
         int                         mSkinImageHeight{};
         int                         mSkinImageWidth{};
         std::string                 mSkinResourcePatch{};
+        std::string                 mProfileHash{};
+        std::optional<std::string>  mNonce{};
         std::string                 mThirdPartyName{};
         bool                        mTrustedSkin{};
         int                         mUIProfile{};
@@ -172,6 +174,10 @@ public:
     [[nodiscard]] std::string_view getServerAddress() const { return mPayload.mServerAddress; }
 
     [[nodiscard]] std::string_view getSkinAnimationData() const { return mPayload.mSkinAnimationData; }
+
+    [[nodiscard]] std::string_view getProfileHash() const { return mPayload.mProfileHash; }
+
+    [[nodiscard]] const std::optional<std::string>& getNonce() const { return mPayload.mNonce; }
 
     [[nodiscard]] std::string_view getSkinColor() const { return mPayload.mSkinColor; }
 

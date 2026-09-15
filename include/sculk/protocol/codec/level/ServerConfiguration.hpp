@@ -12,14 +12,14 @@
 namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
 struct GatheringsConfigurationJoinInfo {
-    UUID        mExperienceId{};
-    std::string mExperienceName{};
-    UUID        mExperienceWorldId{};
-    std::string mExperienceWorldName{};
-    std::string mCreatorId{};
-    UUID        mTargetId{};
-    std::string mScenarioId{};
-    std::string mServerId{};
+    UUID                       mExperienceId{};
+    std::string                mExperienceName{};
+    std::optional<UUID>        mExperienceWorldId{};
+    std::optional<std::string> mExperienceWorldName{};
+    std::string                mCreatorId{};
+    std::optional<UUID>        mTargetId{};
+    std::optional<std::string> mScenarioId{};
+    std::optional<std::string> mServerId{};
 
     void write(BinaryStream& stream) const;
 

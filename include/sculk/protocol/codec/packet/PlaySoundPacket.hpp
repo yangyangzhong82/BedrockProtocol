@@ -18,6 +18,7 @@ public:
     BlockPos                     mPosition{};
     float                        mVolume{};
     float                        mPitch{};
+    std::int32_t                 mLoopCount{-1};
     std::optional<std::uint64_t> mServerSoundHandle{};
 
 public:

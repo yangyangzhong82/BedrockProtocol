@@ -17,7 +17,7 @@
 
 struct evp_cipher_ctx_st;
 
-namespace sculk::protocol::inline abi_v944 {
+namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
 struct EvpCipherCtxDeleter {
     void operator()(evp_cipher_ctx_st* ctx) const noexcept;
@@ -72,4 +72,4 @@ private:
     [[nodiscard]] Result<std::vector<std::byte>> ctrCrypt(EvpCipherCtxPtr& ctx, std::span<const std::byte> bytes) const;
 };
 
-} // namespace sculk::protocol::inline abi_v944
+} // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE

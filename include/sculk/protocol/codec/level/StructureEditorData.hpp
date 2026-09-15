@@ -11,14 +11,14 @@
 namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
 struct StructureEditorData {
-    std::string       mStructureName{};
-    std::string       mFilteredStructureName{};
-    std::string       mDataField{};
-    bool              mIncludePlayer{false};
-    bool              mShowBoundingBox{false};
-    std::int32_t      mStructureBlockType{};
-    StructureSettings mStructureSettings{};
-    std::int32_t      mRedstoneSaveMode{};
+    std::string                mStructureName{};
+    std::optional<std::string> mFilteredStructureName{};
+    std::string                mDataField{};
+    bool                       mIncludePlayer{false};
+    bool                       mShowBoundingBox{false};
+    std::int32_t               mStructureBlockType{};
+    StructureSettings          mStructureSettings{};
+    std::uint8_t               mRedstoneSaveMode{};
 
     void write(BinaryStream& stream) const;
 

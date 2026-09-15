@@ -17,16 +17,23 @@ MinecraftPacketIds PlayerLocationPacket::getId() const noexcept { return Minecra
 std::string_view PlayerLocationPacket::getName() const noexcept { return "PlayerLocationPacket"; }
 
 void PlayerLocationPacket::write(BinaryStream& stream) const {
-    stream.writeEnum(mType, &BinaryStream::writeSignedInt);
     stream.writeVarInt64(mActorUniqueId);
+    stream.writeEnum(mType, &BinaryStream::writeUnsignedVarInt);
+    stream.writeEnum(mType, &BinaryStream::writeVarInt);
     if (mType == Type::PlayerLocationCoordinates) {
         mPosition.write(stream);
     }
 }
 
 Result<> PlayerLocationPacket::read(ReadOnlyBinaryStream& stream) {
-    _SCULK_READ(stream.readEnum(mType, &ReadOnlyBinaryStream::readSignedInt));
     _SCULK_READ(stream.readVarInt64(mActorUniqueId));
+    std::uint32_t variant{};
+    _SCULK_READ(stream.readUnsignedVarInt(variant));
+    _SCULK_READ(stream.readEnum(mType, &ReadOnlyBinaryStream::readVarInt));
+    if (variant > 1 || variant != static_cast<std::uint32_t>(mType)) {
+        return error_utils::makeError("Invalid player location variant");
+    }
+    mPosition = {};
     if (mType == Type::PlayerLocationCoordinates) {
         return mPosition.read(stream);
     }

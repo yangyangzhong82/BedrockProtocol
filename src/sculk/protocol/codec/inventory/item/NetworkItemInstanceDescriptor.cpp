@@ -10,27 +10,19 @@
 namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
 void NetworkItemInstanceDescriptor::write(BinaryStream& stream) const {
-    if (mId == 0) {
-        stream.writeVarInt(0);
-    } else {
-        stream.writeVarInt(mId);
-        stream.writeUnsignedShort(mStackSize);
-        stream.writeUnsignedVarInt(mAux);
-        stream.writeVarInt(mBlockRuntimeId);
-        stream.writeString(mUserData);
-    }
+    stream.writeVarInt(mId);
+    stream.writeUnsignedShort(mStackSize);
+    stream.writeUnsignedVarInt(mAux);
+    stream.writeVarInt(mBlockRuntimeId);
+    stream.writeString(mUserData);
 }
 
 Result<> NetworkItemInstanceDescriptor::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readVarInt(mId));
-    if (mId == 0) {
-        return {};
-    } else {
-        _SCULK_READ(stream.readUnsignedShort(mStackSize));
-        _SCULK_READ(stream.readUnsignedVarInt(mAux));
-        _SCULK_READ(stream.readVarInt(mBlockRuntimeId));
-        return stream.readString(mUserData);
-    }
+    _SCULK_READ(stream.readUnsignedShort(mStackSize));
+    _SCULK_READ(stream.readUnsignedVarInt(mAux));
+    _SCULK_READ(stream.readVarInt(mBlockRuntimeId));
+    return stream.readString(mUserData);
 }
 
 } // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE

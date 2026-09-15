@@ -18,6 +18,7 @@ void DimensionDataPacket::DimensionDefinition::write(BinaryStream& stream) const
     stream.writeVarInt(mHeightMin);
     stream.writeEnum(mGeneratorType, &BinaryStream::writeVarInt);
     stream.writeVarInt(mDimensionType);
+    mPackId.write(stream);
 }
 
 Result<> DimensionDataPacket::DimensionDefinition::read(ReadOnlyBinaryStream& stream) {
@@ -25,7 +26,8 @@ Result<> DimensionDataPacket::DimensionDefinition::read(ReadOnlyBinaryStream& st
     _SCULK_READ(stream.readVarInt(mHeightMax));
     _SCULK_READ(stream.readVarInt(mHeightMin));
     _SCULK_READ(stream.readEnum(mGeneratorType, &ReadOnlyBinaryStream::readVarInt));
-    return stream.readVarInt(mDimensionType);
+    _SCULK_READ(stream.readVarInt(mDimensionType));
+    return mPackId.read(stream);
 }
 
 MinecraftPacketIds DimensionDataPacket::getId() const noexcept { return MinecraftPacketIds::DimensionData; }

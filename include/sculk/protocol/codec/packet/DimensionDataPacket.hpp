@@ -6,6 +6,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 #pragma once
+#include "sculk/protocol/codec/actor/player/UUID.hpp"
 #include "sculk/protocol/codec/packet/IPacket.hpp"
 #include "sculk/protocol/utility/Enum.hpp"
 
@@ -29,6 +30,7 @@ public:
         std::int32_t  mHeightMin{};
         GeneratorType mGeneratorType{};
         std::int32_t  mDimensionType{};
+        UUID          mPackId{};
 
         void write(BinaryStream& stream) const;
 

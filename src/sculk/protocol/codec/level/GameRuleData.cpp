@@ -37,37 +37,8 @@ Result<> GameRuleData::read(ReadOnlyBinaryStream& stream) {
     );
 }
 
-void GameRuleData::writeLevelSettings(BinaryStream& stream) const {
-    stream.writeString(mName);
-    stream.writeBool(mCanBeModifiedByPlayer);
-    stream.writeVariant(
-        mData,
-        Overload{
-            [](std::monostate) {},
-            [&](bool value) { stream.writeBool(value); },
-            [&](int value) { stream.writeUnsignedVarInt(static_cast<std::uint32_t>(value)); },
-            [&](float value) { stream.writeFloat(value); },
-        }
-    );
-}
+void GameRuleData::writeLevelSettings(BinaryStream& stream) const { write(stream); }
 
-Result<> GameRuleData::readLevelSettings(ReadOnlyBinaryStream& stream) {
-    _SCULK_READ(stream.readString(mName));
-    _SCULK_READ(stream.readBool(mCanBeModifiedByPlayer));
-    return stream.readVariant(
-        mData,
-        Overload{
-            [](std::monostate) { return Result<>{}; },
-            [&](bool& value) { return stream.readBool(value); },
-            [&](int& value) {
-                std::uint32_t rawValue{};
-                _SCULK_READ(stream.readUnsignedVarInt(rawValue));
-                value = static_cast<int>(rawValue);
-                return Result<>{};
-            },
-            [&](float& value) { return stream.readFloat(value); },
-        }
-    );
-}
+Result<> GameRuleData::readLevelSettings(ReadOnlyBinaryStream& stream) { return read(stream); }
 
 } // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE

@@ -45,46 +45,34 @@ MinecraftPacketIds PlayerListPacket::getId() const noexcept { return MinecraftPa
 std::string_view PlayerListPacket::getName() const noexcept { return "PlayerListPacket"; }
 
 void PlayerListPacket::write(BinaryStream& stream) const {
-    stream.writeEnum(mAction, &BinaryStream::writeByte);
-    stream.writeUnsignedVarInt(static_cast<std::uint32_t>(mPlayerEntryList.size()));
-    if (mAction == ActionType::Add) {
-        for (const PlayerListEntry& entry : mPlayerEntryList) {
+    stream.writeArray(mPlayerEntryList, [](const PlayerListEntry& entry, BinaryStream& stream) {
+        stream.writeUnsignedVarInt(entry.mAction == ActionType::Add ? 1 : 0);
+        stream.writeEnum(entry.mAction, &BinaryStream::writeByte);
+        if (entry.mAction == ActionType::Add) {
             entry.write(stream);
-        }
-        for (const PlayerListEntry& entry : mPlayerEntryList) {
-            stream.writeBool(entry.mSkinTrusted);
-        }
-    } else {
-        for (const PlayerListEntry& entry : mPlayerEntryList) {
+        } else {
             entry.mUUID.write(stream);
         }
-    }
+    });
 }
 
 Result<> PlayerListPacket::read(ReadOnlyBinaryStream& stream) {
-    _SCULK_READ(stream.readEnum(mAction, &ReadOnlyBinaryStream::readByte));
-    std::uint32_t entryCount{};
-    _SCULK_READ(stream.readUnsignedVarInt(entryCount));
-    mPlayerEntryList.resize(static_cast<std::size_t>(entryCount));
-    if (mAction == ActionType::Add) {
-        for (PlayerListEntry& entry : mPlayerEntryList) {
-            _SCULK_READ(entry.read(stream));
+    return stream.readArray(mPlayerEntryList, [](PlayerListEntry& entry, ReadOnlyBinaryStream& stream) -> Result<> {
+        std::uint32_t variant{};
+        _SCULK_READ(stream.readUnsignedVarInt(variant));
+        _SCULK_READ(stream.readEnum(entry.mAction, &ReadOnlyBinaryStream::readByte));
+        if (variant > 1 || static_cast<std::uint32_t>(entry.mAction) != 1 - variant) {
+            return error_utils::makeError("Invalid player list entry variant");
         }
-        for (PlayerListEntry& entry : mPlayerEntryList) {
-            _SCULK_READ(stream.readBool(entry.mSkinTrusted));
+        if (entry.mAction == ActionType::Add) {
+            return entry.read(stream);
         }
-    } else {
-        for (PlayerListEntry& entry : mPlayerEntryList) {
-            _SCULK_READ(entry.mUUID.read(stream));
-        }
-    }
-    return {};
+        return entry.mUUID.read(stream);
+    });
 }
 
 #ifdef SCULK_PROTOCOL_ENABLE_FORMATTING
-std::string PlayerListPacket::toString() const {
-    return SCULK_FORMAT_PACKET(SCULK_FORMAT_FIELD(mAction), SCULK_FORMAT_FIELD(mPlayerEntryList));
-}
+std::string PlayerListPacket::toString() const { return SCULK_FORMAT_PACKET(SCULK_FORMAT_FIELD(mPlayerEntryList)); }
 #endif
 
 } // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE

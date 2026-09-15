@@ -6,43 +6,20 @@
 // SPDX-License-Identifier: MPL-2.0
 
 #include "sculk/protocol/codec/inventory/transaction/InventoryTransactionSource.hpp"
+#include "sculk/protocol/codec/utility/Cereal.hpp"
 
 namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
 void InventoryTransactionSource::write(BinaryStream& stream) const {
     stream.writeEnum(mType, &BinaryStream::writeUnsignedVarInt);
-    stream.writeBool(true); // unknown flag, should always be true
-    stream.writeOptional(mContainerId, [&](BinaryStream& stream, const std::uint8_t& value) {
-        stream.writeByte(value);
-    });
-    stream.writeBool(true); // unknown flag, should always be true
-    stream.writeOptional(mBitFlags, [&](BinaryStream& stream, std::uint32_t const& value) {
-        stream.writeUnsignedVarInt(value);
-    });
+    writeDoubleOptional(stream, mContainerId, &BinaryStream::writeByte);
+    writeDoubleOptional(stream, mBitFlags, &BinaryStream::writeUnsignedVarInt);
 }
 
 Result<> InventoryTransactionSource::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readEnum(mType, &ReadOnlyBinaryStream::readUnsignedVarInt));
-
-    bool unknownFlag1{};
-    _SCULK_READ(stream.readBool(unknownFlag1));
-    if (!unknownFlag1) {
-        return error_utils::makeError("Expected container id");
-    }
-
-    _SCULK_READ(stream.readOptional(mContainerId, [&](ReadOnlyBinaryStream& stream, std::uint8_t& value) {
-        return stream.readByte(value);
-    }));
-
-    bool unknownFlag2{};
-    _SCULK_READ(stream.readBool(unknownFlag2));
-    if (!unknownFlag2) {
-        return error_utils::makeError("Expected bit flags");
-    }
-
-    return stream.readOptional(mBitFlags, [&](ReadOnlyBinaryStream& stream, std::uint32_t& value) {
-        return stream.readUnsignedVarInt(value);
-    });
+    _SCULK_READ(readDoubleOptional(stream, mContainerId, &ReadOnlyBinaryStream::readByte));
+    return readDoubleOptional(stream, mBitFlags, &ReadOnlyBinaryStream::readUnsignedVarInt);
 }
 
 void InventoryTransactionSource::writeLegacy(BinaryStream& stream) const {

@@ -29,7 +29,7 @@ struct LevelSettings {
     bool                      mIsCreatedInEditor{};
     bool                      mIsExportedFromEditor{};
     int                       mDayCycleStopTime{};
-    int                       mEduOffer{};
+    std::uint32_t             mEduOffer{};
     bool                      mIsEdu{};
     std::string               mEduProductId{};
     float                     mRainLevel{};
@@ -63,7 +63,7 @@ struct LevelSettings {
     bool                      mNetherType{};
     std::string               mEduResourceButtonName{};
     std::string               mEduResourceUri{};
-    bool                      mForceExperimentalGameplay{};
+    std::optional<bool>       mForceExperimentalGameplay{};
     std::uint8_t              mChatRestrictionLevel{};
     bool                      mDisablePlayerInteractions{};
     int                       mServerEditorConnectionPolicy{};

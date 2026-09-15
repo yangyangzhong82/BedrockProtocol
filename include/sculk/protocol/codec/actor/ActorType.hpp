@@ -184,7 +184,8 @@ enum class ActorType : std::int32_t {
     ZombieNautilus             = 150 | WaterAnimal | Undead,
     Parched                    = 151 | SkeletonMonster,
     CamelHusk                  = 152 | Animal | Undead,
-    SulfurCube                 = 153 | Monster,
+    SulfurCube                 = 153 | PathfinderMob,
+    Cushion                    = 154,
 };
 
 } // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE

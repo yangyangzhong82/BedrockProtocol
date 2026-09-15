@@ -19,7 +19,7 @@
 #include <utility>
 #include <vector>
 
-namespace sculk::protocol::inline abi_v944 {
+namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
 Result<std::vector<std::byte>>
 CryptoManager::computeEcdhSharedSecret(std::string_view localPrivateKeyPem, std::string_view remotePublicKeyPem) {
@@ -203,13 +203,13 @@ Result<std::vector<std::byte>> CryptoManager::ctrCrypt(EvpCipherCtxPtr& ctx, std
 
     int        outLen = 0;
     const bool ok     = EVP_CipherUpdate(
-                        ctx.get(),
-                        reinterpret_cast<std::uint8_t*>(output.data()),
-                        &outLen,
-                        reinterpret_cast<const std::uint8_t*>(bytes.data()),
-                        static_cast<int>(bytes.size())
-                    )
-                 == 1;
+                            ctx.get(),
+                            reinterpret_cast<std::uint8_t*>(output.data()),
+                            &outLen,
+                            reinterpret_cast<const std::uint8_t*>(bytes.data()),
+                            static_cast<int>(bytes.size())
+                        )
+                     == 1;
 
     if (!ok || static_cast<std::size_t>(outLen) != output.size()) {
         return error_utils::makeError("Failed to process data with cipher");
@@ -270,4 +270,4 @@ bool CryptoManager::verify(std::span<const std::byte> input) {
     return std::equal(expected.begin(), expected.end(), input.begin() + static_cast<std::ptrdiff_t>(payloadSize));
 }
 
-} // namespace sculk::protocol::inline abi_v944
+} // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE

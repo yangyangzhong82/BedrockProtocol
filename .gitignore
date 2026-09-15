@@ -48,6 +48,10 @@
 /docs/
 /examples/
 
+# xmake
+/.xmake/
+/.xmake-temp/
+
 # IDE files
 .vscode/
 .vs/

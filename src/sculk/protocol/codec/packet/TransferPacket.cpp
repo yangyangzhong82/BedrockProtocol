@@ -20,12 +20,14 @@ void TransferPacket::write(BinaryStream& stream) const {
     stream.writeString(mServerAddress);
     stream.writeUnsignedShort(mServerPort);
     stream.writeBool(mReloadWorld);
+    stream.writeOptional(mGatheringsConfiguration, &GatheringsConfigurationJoinInfo::write);
 }
 
 Result<> TransferPacket::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readString(mServerAddress));
     _SCULK_READ(stream.readUnsignedShort(mServerPort));
-    return stream.readBool(mReloadWorld);
+    _SCULK_READ(stream.readBool(mReloadWorld));
+    return stream.readOptional(mGatheringsConfiguration, &GatheringsConfigurationJoinInfo::read);
 }
 
 #ifdef SCULK_PROTOCOL_ENABLE_FORMATTING
@@ -33,7 +35,8 @@ std::string TransferPacket::toString() const {
     return SCULK_FORMAT_PACKET(
         SCULK_FORMAT_FIELD(mServerAddress),
         SCULK_FORMAT_FIELD(mServerPort),
-        SCULK_FORMAT_FIELD(mReloadWorld)
+        SCULK_FORMAT_FIELD(mReloadWorld),
+        SCULK_FORMAT_FIELD(mGatheringsConfiguration)
     );
 }
 #endif

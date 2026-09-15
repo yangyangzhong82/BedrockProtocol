@@ -24,7 +24,7 @@ public:
     };
 
     struct Group {
-        std::int32_t                  mCategory{};
+        std::uint8_t                  mCategory{};
         std::string                   mName{};
         NetworkItemInstanceDescriptor mIcon{};
 

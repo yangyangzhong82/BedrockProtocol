@@ -17,7 +17,14 @@ MinecraftPacketIds CraftingDataPacket::getId() const noexcept { return Minecraft
 std::string_view CraftingDataPacket::getName() const noexcept { return "CraftingDataPacket"; }
 
 void CraftingDataPacket::write(BinaryStream& stream) const {
-    stream.writeArray(mCraftingDataEntries, &CraftingDataEntry::write);
+    stream.writeArray(mShapedRecipes, &ShapedRecipe::write);
+    stream.writeArray(mShapelessRecipes, &ShapelessRecipe::write);
+    stream.writeArray(mMultiRecipes, &MultiRecipe::write);
+    stream.writeArray(mUserDataShapelessRecipes, &UserDataShapelessRecipe::write);
+    stream.writeArray(mShapelessChemistryRecipes, &ShapelessChemistryRecipe::write);
+    stream.writeArray(mShapedChemistryRecipes, &ShapedChemistryRecipe::write);
+    stream.writeArray(mSmithingTransformRecipes, &SmithingTransformRecipe::write);
+    stream.writeArray(mSmithingTrimRecipes, &SmithingTrimRecipe::write);
     stream.writeArray(mPotionMixDataEntries, &PotionMixDataEntry::write);
     stream.writeArray(mContainerMixDataEntries, &ContainerMixDataEntry::write);
     stream.writeArray(mMaterialReducerDataEntries, &MaterialReducerDataEntry::write);
@@ -25,7 +32,14 @@ void CraftingDataPacket::write(BinaryStream& stream) const {
 }
 
 Result<> CraftingDataPacket::read(ReadOnlyBinaryStream& stream) {
-    _SCULK_READ(stream.readArray(mCraftingDataEntries, &CraftingDataEntry::read));
+    _SCULK_READ(stream.readArray(mShapedRecipes, &ShapedRecipe::read));
+    _SCULK_READ(stream.readArray(mShapelessRecipes, &ShapelessRecipe::read));
+    _SCULK_READ(stream.readArray(mMultiRecipes, &MultiRecipe::read));
+    _SCULK_READ(stream.readArray(mUserDataShapelessRecipes, &UserDataShapelessRecipe::read));
+    _SCULK_READ(stream.readArray(mShapelessChemistryRecipes, &ShapelessChemistryRecipe::read));
+    _SCULK_READ(stream.readArray(mShapedChemistryRecipes, &ShapedChemistryRecipe::read));
+    _SCULK_READ(stream.readArray(mSmithingTransformRecipes, &SmithingTransformRecipe::read));
+    _SCULK_READ(stream.readArray(mSmithingTrimRecipes, &SmithingTrimRecipe::read));
     _SCULK_READ(stream.readArray(mPotionMixDataEntries, &PotionMixDataEntry::read));
     _SCULK_READ(stream.readArray(mContainerMixDataEntries, &ContainerMixDataEntry::read));
     _SCULK_READ(stream.readArray(mMaterialReducerDataEntries, &MaterialReducerDataEntry::read));
@@ -35,7 +49,14 @@ Result<> CraftingDataPacket::read(ReadOnlyBinaryStream& stream) {
 #ifdef SCULK_PROTOCOL_ENABLE_FORMATTING
 std::string CraftingDataPacket::toString() const {
     return SCULK_FORMAT_PACKET(
-        SCULK_FORMAT_FIELD(mCraftingDataEntries),
+        SCULK_FORMAT_FIELD(mShapedRecipes),
+        SCULK_FORMAT_FIELD(mShapelessRecipes),
+        SCULK_FORMAT_FIELD(mMultiRecipes),
+        SCULK_FORMAT_FIELD(mUserDataShapelessRecipes),
+        SCULK_FORMAT_FIELD(mShapelessChemistryRecipes),
+        SCULK_FORMAT_FIELD(mShapedChemistryRecipes),
+        SCULK_FORMAT_FIELD(mSmithingTransformRecipes),
+        SCULK_FORMAT_FIELD(mSmithingTrimRecipes),
         SCULK_FORMAT_FIELD(mPotionMixDataEntries),
         SCULK_FORMAT_FIELD(mContainerMixDataEntries),
         SCULK_FORMAT_FIELD(mMaterialReducerDataEntries)

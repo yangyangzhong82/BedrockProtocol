@@ -10,15 +10,11 @@
 namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
 void PresenceConfiguration::write(BinaryStream& stream) const {
-    stream.writeOptional(mExperienceName, &BinaryStream::writeString);
-    stream.writeOptional(mWorldName, &BinaryStream::writeString);
-    stream.writeString(mRichPresenceId);
+    stream.writeOptional(mRichPresenceId, &BinaryStream::writeString);
 }
 
 Result<> PresenceConfiguration::read(ReadOnlyBinaryStream& stream) {
-    _SCULK_READ(stream.readOptional(mExperienceName, &ReadOnlyBinaryStream::readString));
-    _SCULK_READ(stream.readOptional(mWorldName, &ReadOnlyBinaryStream::readString));
-    return stream.readString(mRichPresenceId);
+    return stream.readOptional(mRichPresenceId, &ReadOnlyBinaryStream::readString);
 }
 
 } // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE

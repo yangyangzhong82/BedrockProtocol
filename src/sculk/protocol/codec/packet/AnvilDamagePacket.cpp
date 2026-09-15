@@ -16,20 +16,12 @@ MinecraftPacketIds AnvilDamagePacket::getId() const noexcept { return MinecraftP
 
 std::string_view AnvilDamagePacket::getName() const noexcept { return "AnvilDamagePacket"; }
 
-void AnvilDamagePacket::write(BinaryStream& stream) const {
-    stream.writeByte(mDamageAmount);
-    mPosition.write(stream);
-}
+void AnvilDamagePacket::write(BinaryStream& stream) const { mPosition.write(stream); }
 
-Result<> AnvilDamagePacket::read(ReadOnlyBinaryStream& stream) {
-    _SCULK_READ(stream.readByte(mDamageAmount));
-    return mPosition.read(stream);
-}
+Result<> AnvilDamagePacket::read(ReadOnlyBinaryStream& stream) { return mPosition.read(stream); }
 
 #ifdef SCULK_PROTOCOL_ENABLE_FORMATTING
-std::string AnvilDamagePacket::toString() const {
-    return SCULK_FORMAT_PACKET(SCULK_FORMAT_FIELD(mDamageAmount), SCULK_FORMAT_FIELD(mPosition));
-}
+std::string AnvilDamagePacket::toString() const { return SCULK_FORMAT_PACKET(SCULK_FORMAT_FIELD(mPosition)); }
 #endif
 
 } // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE

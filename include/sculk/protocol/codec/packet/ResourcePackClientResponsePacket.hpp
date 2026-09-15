@@ -13,7 +13,9 @@ namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
 class ResourcePackClientResponsePacket : public IPacket {
 public:
-    std::uint8_t             mResponse{};
+    // Legacy response values remain 1..4; the wire discriminator is response - 1.
+    enum Response : std::uint8_t { Cancel = 1, Downloading = 2, DownloadingFinished = 3, StackFinished = 4 };
+    std::uint8_t             mResponse{Cancel};
     std::vector<std::string> mPackIds{};
 
 public:

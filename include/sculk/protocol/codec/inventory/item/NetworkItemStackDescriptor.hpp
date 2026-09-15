@@ -25,6 +25,7 @@ struct ItemStackLegacyRequestId {
 };
 
 struct NetworkItemStackDescriptor {
+    // Each alternative stores the signed wire ID: server >= 0, request negative odd, legacy negative even.
     using NetIdVariant = std::variant<ItemStackNetId, ItemStackRequestId, ItemStackLegacyRequestId>;
 
     short                       mId{};

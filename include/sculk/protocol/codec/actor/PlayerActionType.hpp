@@ -52,9 +52,10 @@ enum class PlayerActionType : std::int8_t {
     StopFlying                      = 35,
     DeprecatedClientAckServerData   = 36,
     StartUsingItem                  = 37,
-    Count                           = 38,
+    InternalUpdate                  = 38,
+    Count                           = 39,
 };
 
 } // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE
 
-SCULK_PROTOCOL_ENUM_RANGE(PlayerActionType, -1, 38)
+SCULK_PROTOCOL_ENUM_RANGE(PlayerActionType, -1, 39)

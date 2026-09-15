@@ -11,8 +11,12 @@ namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
 void ItemUseInventoryTransaction::write(BinaryStream& stream) const {
     mTransaction.write(stream);
+    writeWithoutActions(stream);
+}
+
+void ItemUseInventoryTransaction::writeWithoutActions(BinaryStream& stream) const {
     stream.writeEnum(mActionType, &BinaryStream::writeVarInt);
-    stream.writeEnum(mTriggerType, &BinaryStream::writeUnsignedVarInt);
+    stream.writeEnum(mTriggerType, &BinaryStream::writeByte);
     mPos.write(stream);
     stream.writeByte(mFace);
     stream.writeVarInt(mSlot);
@@ -26,8 +30,12 @@ void ItemUseInventoryTransaction::write(BinaryStream& stream) const {
 
 Result<> ItemUseInventoryTransaction::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(mTransaction.read(stream));
+    return readWithoutActions(stream);
+}
+
+Result<> ItemUseInventoryTransaction::readWithoutActions(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readEnum(mActionType, &ReadOnlyBinaryStream::readVarInt));
-    _SCULK_READ(stream.readEnum(mTriggerType, &ReadOnlyBinaryStream::readUnsignedVarInt));
+    _SCULK_READ(stream.readEnum(mTriggerType, &ReadOnlyBinaryStream::readByte));
     _SCULK_READ(mPos.read(stream));
     _SCULK_READ(stream.readByte(mFace));
     _SCULK_READ(stream.readVarInt(mSlot));
@@ -42,7 +50,7 @@ Result<> ItemUseInventoryTransaction::read(ReadOnlyBinaryStream& stream) {
 void ItemUseInventoryTransaction::writeLegacy(BinaryStream& stream) const {
     mTransaction.writeLegacy(stream);
     stream.writeEnum(mActionType, &BinaryStream::writeUnsignedVarInt);
-    stream.writeEnum(mTriggerType, &BinaryStream::writeUnsignedVarInt);
+    stream.writeEnum(mTriggerType, &BinaryStream::writeByte);
     mPos.write(stream);
     stream.writeVarInt(static_cast<std::int32_t>(mFace));
     stream.writeVarInt(mSlot);
@@ -57,7 +65,7 @@ void ItemUseInventoryTransaction::writeLegacy(BinaryStream& stream) const {
 Result<> ItemUseInventoryTransaction::readLegacy(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(mTransaction.readLegacy(stream));
     _SCULK_READ(stream.readEnum(mActionType, &ReadOnlyBinaryStream::readUnsignedVarInt));
-    _SCULK_READ(stream.readEnum(mTriggerType, &ReadOnlyBinaryStream::readUnsignedVarInt));
+    _SCULK_READ(stream.readEnum(mTriggerType, &ReadOnlyBinaryStream::readByte));
     _SCULK_READ(mPos.read(stream));
     std::int32_t face{};
     _SCULK_READ(stream.readVarInt(face));

@@ -6,13 +6,16 @@
 // SPDX-License-Identifier: MPL-2.0
 
 #pragma once
+#include "sculk/protocol/codec/actor/player/UUID.hpp"
 #include "sculk/protocol/utility/BinaryStream.hpp"
 #include "sculk/protocol/utility/Enum.hpp"
 #include "sculk/protocol/utility/ReadOnlyBinaryStream.hpp"
+#include <array>
 
 namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
 enum class AnimatedTextureType : std::uint8_t {
+    None        = 0,
     Face        = 1,
     Body32x32   = 2,
     Body128x128 = 3,
@@ -76,8 +79,8 @@ public:
 
     struct PersonaPiece {
         std::string mPieceId{};
-        std::string mPieceType{};
-        std::string mPackId{};
+        PieceType   mPieceType{};
+        UUID        mPackId{};
         bool        mIsDefaultPiece{};
         std::string mProductId{};
 
@@ -87,8 +90,8 @@ public:
     };
 
     struct PieceTintColors {
-        std::string              mPieceType{};
-        std::vector<std::string> mPieceTintColors{};
+        std::string                  mPieceType{};
+        std::array<std::uint32_t, 4> mPieceTintColors{};
 
         void write(BinaryStream& stream) const;
 
@@ -111,8 +114,8 @@ public:
     std::string                  mAnimationData{};
     std::string                  mCapeId{};
     std::string                  mFullId{};
-    std::string                  mArmSize{};
-    std::string                  mSkinColor{};
+    ArmSizeType                  mArmSize{};
+    std::uint32_t                mSkinColor{};
     std::vector<PersonaPiece>    mPersonaPieces{};
     std::vector<PieceTintColors> mPieceTintColors{};
     bool                         mIsPremiumSkin{};
@@ -120,6 +123,9 @@ public:
     bool                         mIsPersonaCapeOnClassicSkin{};
     bool                         mIsPrimaryUser{};
     bool                         mOverridesPlayerAppearance{};
+    // "unset", "false", or "true", as used by the TrustedSkinFlag wire enum.
+    std::string mTrustedSkinFlag{"unset"};
+    std::string mProfileHash{};
 
     void write(BinaryStream& stream) const;
 
@@ -128,7 +134,7 @@ public:
 
 } // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE
 
-SCULK_PROTOCOL_ENUM_RANGE(AnimatedTextureType, 1, 3)
+SCULK_PROTOCOL_ENUM_RANGE(AnimatedTextureType, 0, 3)
 SCULK_PROTOCOL_ENUM_RANGE(AnimationExpression, 0, 1)
 SCULK_PROTOCOL_ENUM_RANGE(SerializedSkin::ArmSizeType, 0, 1)
 SCULK_PROTOCOL_ENUM_RANGE(SerializedSkin::PieceType, 1, 27)

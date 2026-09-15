@@ -13,8 +13,7 @@ namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
 class AnvilDamagePacket : public IPacket {
 public:
-    std::uint8_t mDamageAmount{};
-    BlockPos     mPosition{};
+    BlockPos mPosition{};
 
 public:
     [[nodiscard]] MinecraftPacketIds getId() const noexcept override;

@@ -26,52 +26,40 @@ Result<> SubChunkPacket::SubChunkPosOffset::read(ReadOnlyBinaryStream& stream) {
 
 void SubChunkPacket::HeightmapData::write(BinaryStream& stream) const {
     stream.writeEnum(mHeightMapType, &BinaryStream::writeByte);
-    if (mHeightMapType == HeightMapDataType::HasData) {
-        stream.writeBytes(&mSubchunkHeightMap, sizeof(mSubchunkHeightMap));
-    }
+    stream.writeOptional(mSubchunkHeightMap, [](BinaryStream& stream, const auto& data) {
+        stream.writeBytes(&data, sizeof(data));
+    });
     stream.writeEnum(mRenderHeightMapType, &BinaryStream::writeByte);
-    if (mRenderHeightMapType == HeightMapDataType::HasData) {
-        stream.writeBytes(&mRenderHeightMap, sizeof(mRenderHeightMap));
-    }
+    stream.writeOptional(mRenderHeightMap, [](BinaryStream& stream, const auto& data) {
+        stream.writeBytes(&data, sizeof(data));
+    });
 }
 
 Result<> SubChunkPacket::HeightmapData::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readEnum(mHeightMapType, &ReadOnlyBinaryStream::readByte));
-    if (mHeightMapType == HeightMapDataType::HasData) {
-        _SCULK_READ(stream.readBytes(&mSubchunkHeightMap, sizeof(mSubchunkHeightMap)));
-    }
+    _SCULK_READ(stream.readOptional(mSubchunkHeightMap, [](ReadOnlyBinaryStream& stream, auto& data) {
+        return stream.readBytes(&data, sizeof(data));
+    }));
     _SCULK_READ(stream.readEnum(mRenderHeightMapType, &ReadOnlyBinaryStream::readByte));
-    if (mRenderHeightMapType == HeightMapDataType::HasData) {
-        _SCULK_READ(stream.readBytes(&mRenderHeightMap, sizeof(mRenderHeightMap)));
-    }
-    return {};
+    return stream.readOptional(mRenderHeightMap, [](ReadOnlyBinaryStream& stream, auto& data) {
+        return stream.readBytes(&data, sizeof(data));
+    });
 }
 
-void SubChunkPacket::SubChunkPacketData::write(BinaryStream& stream, bool cacheEnabled) const {
+void SubChunkPacket::SubChunkPacketData::write(BinaryStream& stream) const {
     mSubChunkPosOffset.write(stream);
     stream.writeEnum(mResult, &BinaryStream::writeByte);
-    if (!cacheEnabled || mResult != SubChunkRequestResult::SuccessAllAir) {
-        stream.writeString(mSerializedSubChunk);
-    }
+    stream.writeOptional(mSerializedSubChunk, &BinaryStream::writeString);
     mHeightMapData.write(stream);
-    if (cacheEnabled) {
-        stream.writeUnsignedInt64(mBlobId);
-    }
+    stream.writeOptional(mBlobId, &BinaryStream::writeUnsignedInt64);
 }
 
-Result<> SubChunkPacket::SubChunkPacketData::read(ReadOnlyBinaryStream& stream, bool cacheEnabled) {
+Result<> SubChunkPacket::SubChunkPacketData::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(mSubChunkPosOffset.read(stream));
     _SCULK_READ(stream.readEnum(mResult, &ReadOnlyBinaryStream::readByte));
-    if (!cacheEnabled || mResult != SubChunkRequestResult::SuccessAllAir) {
-        _SCULK_READ(stream.readString(mSerializedSubChunk));
-    } else {
-        mSerializedSubChunk.clear();
-    }
+    _SCULK_READ(stream.readOptional(mSerializedSubChunk, &ReadOnlyBinaryStream::readString));
     _SCULK_READ(mHeightMapData.read(stream));
-    if (cacheEnabled) {
-        return stream.readUnsignedInt64(mBlobId);
-    }
-    return {};
+    return stream.readOptional(mBlobId, &ReadOnlyBinaryStream::readUnsignedInt64);
 }
 
 MinecraftPacketIds SubChunkPacket::getId() const noexcept { return MinecraftPacketIds::SubChunk; }
@@ -81,23 +69,15 @@ std::string_view SubChunkPacket::getName() const noexcept { return "SubChunkPack
 void SubChunkPacket::write(BinaryStream& stream) const {
     stream.writeBool(mCacheEnabled);
     stream.writeVarInt(mDimensionType);
-    mCenterPos.write(stream);
-    stream.writeArray(
-        mSubChunkData,
-        &BinaryStream::writeUnsignedInt,
-        [this](BinaryStream& stream, const SubChunkPacketData& data) { data.write(stream, mCacheEnabled); }
-    );
+    mCenterPos.writeCereal(stream);
+    stream.writeArray(mSubChunkData, &SubChunkPacketData::write);
 }
 
 Result<> SubChunkPacket::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readBool(mCacheEnabled));
     _SCULK_READ(stream.readVarInt(mDimensionType));
-    _SCULK_READ(mCenterPos.read(stream));
-    return stream.readArray(
-        mSubChunkData,
-        &ReadOnlyBinaryStream::readUnsignedInt,
-        [this](ReadOnlyBinaryStream& stream, SubChunkPacketData& data) { return data.read(stream, mCacheEnabled); }
-    );
+    _SCULK_READ(mCenterPos.readCereal(stream));
+    return stream.readArray(mSubChunkData, &SubChunkPacketData::read);
 }
 
 #ifdef SCULK_PROTOCOL_ENABLE_FORMATTING

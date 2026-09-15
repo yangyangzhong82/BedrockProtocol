@@ -78,9 +78,10 @@ enum class PlayerAuthInputData : std::uint8_t {
     SneakReleasedRaw                = 62,
     SneakPressedRaw                 = 63,
     SneakCurrentRaw                 = 64,
-    InputNum                        = 65,
+    InternalUpdate                  = 65,
+    InputNum                        = 66,
 };
 
 } // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE
 
-SCULK_PROTOCOL_ENUM_RANGE(PlayerAuthInputData, 0, 65)
+SCULK_PROTOCOL_ENUM_RANGE(PlayerAuthInputData, 0, 66)

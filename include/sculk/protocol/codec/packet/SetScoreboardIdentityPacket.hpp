@@ -19,8 +19,8 @@ public:
     };
 
     struct ScoreboardIdentity {
-        std::int64_t mScoreboardId{};
-        std::int64_t mPlayerUniqueId{};
+        std::int64_t                mScoreboardId{};
+        std::optional<std::int64_t> mPlayerUniqueId{};
     };
 
 public:

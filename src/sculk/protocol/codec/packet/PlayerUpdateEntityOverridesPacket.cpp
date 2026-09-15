@@ -12,6 +12,10 @@
 
 namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
+namespace {
+constexpr std::string_view overrideNames[] = {"clearoverrides", "removeoverride", "setintoverride", "setfloatoverride"};
+}
+
 MinecraftPacketIds PlayerUpdateEntityOverridesPacket::getId() const noexcept {
     return MinecraftPacketIds::PlayerUpdateEntityOverrides;
 }
@@ -23,7 +27,9 @@ std::string_view PlayerUpdateEntityOverridesPacket::getName() const noexcept {
 void PlayerUpdateEntityOverridesPacket::write(BinaryStream& stream) const {
     stream.writeVarInt64(mId);
     stream.writeUnsignedVarInt(mPropertyIndex);
-    stream.writeEnum(mUpdateType, &BinaryStream::writeByte);
+    stream.writeEnum(mUpdateType, &BinaryStream::writeUnsignedVarInt);
+    const auto type = static_cast<std::uint32_t>(mUpdateType);
+    stream.writeString(type < 4 ? overrideNames[type] : "");
     std::visit(
         Overload{
             [&](std::monostate) {},
@@ -37,7 +43,17 @@ void PlayerUpdateEntityOverridesPacket::write(BinaryStream& stream) const {
 Result<> PlayerUpdateEntityOverridesPacket::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readVarInt64(mId));
     _SCULK_READ(stream.readUnsignedVarInt(mPropertyIndex));
-    _SCULK_READ(stream.readEnum(mUpdateType, &ReadOnlyBinaryStream::readByte));
+    std::uint32_t type{};
+    _SCULK_READ(stream.readUnsignedVarInt(type));
+    if (type >= 4) {
+        return error_utils::makeError("Invalid entity override variant");
+    }
+    std::string name{};
+    _SCULK_READ(stream.readString(name));
+    if (name != overrideNames[type]) {
+        return error_utils::makeError("Mismatched entity override variant name");
+    }
+    mUpdateType = static_cast<UpdateType>(type);
     switch (mUpdateType) {
     case UpdateType::SetIntOverride: {
         std::int32_t value{};

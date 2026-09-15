@@ -13,9 +13,10 @@
 namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
 struct PackedItemUseLegacyInventoryTransaction {
-    std::int32_t                   mLegacyRequestRawId{};
-    std::vector<LegacySetItemSlot> mLegacySetItemSlots{};
-    ItemUseInventoryTransaction    mItemUseTransaction{};
+    std::int32_t                                  mLegacyRequestRawId{};
+    std::optional<std::vector<LegacySetItemSlot>> mLegacySetItemSlots{};
+    ItemUseInventoryTransaction                   mItemUseTransaction{};
+    bool                                          mHasActions{true};
 
     void write(BinaryStream& stream) const;
 

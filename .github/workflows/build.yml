@@ -7,6 +7,7 @@ on:
       - src/**
       - include/**
       - CMakeLists.txt
+      - tests/**
   pull_request:
     branches:
       - main
@@ -14,6 +15,7 @@ on:
       - src/**
       - include/**
       - CMakeLists.txt
+      - tests/**
   workflow_dispatch:
 
 jobs:
@@ -33,10 +35,13 @@ jobs:
           arch: x64
 
       - name: Configure
-        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=cl
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=cl -DPROTOCOL_BUILD_TESTS=ON
 
       - name: Build
         run: cmake --build build --config Release --parallel
+
+      - name: Protocol interoperability tests
+        run: ctest --test-dir build -C Release --output-on-failure
 
   build-on-windows-arm64:
     name: Build on Windows ARM64 (MSVC)

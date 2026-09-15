@@ -15,7 +15,7 @@ void MapDecoration::write(BinaryStream& stream) const {
     stream.writeByte(mX);
     stream.writeByte(mY);
     stream.writeString(mLabel);
-    stream.writeUnsignedVarInt(mColor);
+    stream.writeUnsignedInt(mColor);
 }
 
 Result<> MapDecoration::read(ReadOnlyBinaryStream& stream) {
@@ -24,7 +24,7 @@ Result<> MapDecoration::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readByte(mX));
     _SCULK_READ(stream.readByte(mY));
     _SCULK_READ(stream.readString(mLabel));
-    return stream.readUnsignedVarInt(mColor);
+    return stream.readUnsignedInt(mColor);
 }
 
 } // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE

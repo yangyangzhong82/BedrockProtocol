@@ -24,8 +24,8 @@ struct RecipeUnlockingRequirement {
         PlayerHasManyItems = 3,
     };
 
-    UnlockingContext              mUnlockingContext{};
-    std::vector<RecipeIngredient> mUnlockingIngredients{};
+    UnlockingContext                             mUnlockingContext{};
+    std::optional<std::vector<RecipeIngredient>> mUnlockingIngredients{};
 
     void write(BinaryStream& stream) const;
 
@@ -39,7 +39,7 @@ struct ShapelessRecipe {
     UUID                                       mRecipeId{};
     std::string                                mRecipeTag{};
     std::int32_t                               mPriority{};
-    RecipeUnlockingRequirement                 mUnlockingRequirement{};
+    std::optional<RecipeUnlockingRequirement>  mUnlockingRequirement{};
     std::uint32_t                              mNetId{};
 
     void write(BinaryStream& stream) const;
@@ -57,21 +57,9 @@ struct ShapedRecipe {
     std::string                                mRecipeTag{};
     std::int32_t                               mPriority{};
     bool                                       mAssumeSymmetry{};
-    RecipeUnlockingRequirement                 mUnlockingRequirement{};
+    std::optional<RecipeUnlockingRequirement>  mUnlockingRequirement{};
     std::uint32_t                              mNetId{};
 
-    void write(BinaryStream& stream) const;
-
-    [[nodiscard]] Result<> read(ReadOnlyBinaryStream& stream);
-};
-
-struct FurnaceRecipe {
-    void write(BinaryStream& stream) const;
-
-    [[nodiscard]] Result<> read(ReadOnlyBinaryStream& stream);
-};
-
-struct FurnaceAuxRecipe {
     void write(BinaryStream& stream) const;
 
     [[nodiscard]] Result<> read(ReadOnlyBinaryStream& stream);
@@ -93,7 +81,7 @@ struct UserDataShapelessRecipe {
     UUID                                       mRecipeId{};
     std::string                                mRecipeTag{};
     std::int32_t                               mPriority{};
-    RecipeUnlockingRequirement                 mUnlockingRequirement{};
+    std::optional<RecipeUnlockingRequirement>  mUnlockingRequirement{};
     std::uint32_t                              mNetId{};
 
     void write(BinaryStream& stream) const;
@@ -108,6 +96,7 @@ struct ShapelessChemistryRecipe {
     UUID                                       mRecipeId{};
     std::string                                mRecipeTag{};
     std::int32_t                               mPriority{};
+    std::optional<RecipeUnlockingRequirement>  mUnlockingRequirement{};
     std::uint32_t                              mNetId{};
 
     void write(BinaryStream& stream) const;
@@ -144,26 +133,6 @@ struct SmithingTrimRecipe {
     RecipeIngredient mAddition{};
     std::string      mRecipeTag{};
     std::uint32_t    mNetId{};
-
-    void write(BinaryStream& stream) const;
-
-    [[nodiscard]] Result<> read(ReadOnlyBinaryStream& stream);
-};
-
-struct CraftingDataEntry {
-    using RecipeVariant = std::variant<
-        ShapelessRecipe,
-        ShapedRecipe,
-        FurnaceRecipe,
-        FurnaceAuxRecipe,
-        MultiRecipe,
-        UserDataShapelessRecipe,
-        ShapelessChemistryRecipe,
-        ShapedChemistryRecipe,
-        SmithingTransformRecipe,
-        SmithingTrimRecipe>;
-
-    RecipeVariant mRecipe{};
 
     void write(BinaryStream& stream) const;
 

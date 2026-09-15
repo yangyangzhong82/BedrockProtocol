@@ -28,7 +28,24 @@ Result<> CommandRequestPacket::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readString(mCommand));
     _SCULK_READ(mOriginData.read(stream));
     _SCULK_READ(stream.readBool(mIsInternal));
-    return utils::readEnumName(stream, mVersion);
+    std::string version{};
+    _SCULK_READ(stream.readString(version));
+    for (char& c : version) {
+        c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+    }
+    // These engine enum names alias another numeric value and are omitted by magic_enum.
+    if (version == "latest") {
+        mVersion = CurrentCmdVersion::Latest;
+    } else if (version == "agentsweepingblocktest") {
+        mVersion = CurrentCmdVersion::AgentSweepingBlockTest;
+    } else if (version == "commandpositionfix") {
+        mVersion = CurrentCmdVersion::CommandPositionFix;
+    } else if (auto value = magic_enum::enum_cast<CurrentCmdVersion>(version, magic_enum::case_insensitive)) {
+        mVersion = *value;
+    } else {
+        return error_utils::makeError("Invalid command version name");
+    }
+    return {};
 }
 
 #ifdef SCULK_PROTOCOL_ENABLE_FORMATTING

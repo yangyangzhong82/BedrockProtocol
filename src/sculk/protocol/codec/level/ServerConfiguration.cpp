@@ -12,23 +12,23 @@ namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 void GatheringsConfigurationJoinInfo::write(BinaryStream& stream) const {
     mExperienceId.write(stream);
     stream.writeString(mExperienceName);
-    mExperienceWorldId.write(stream);
-    stream.writeString(mExperienceWorldName);
+    stream.writeOptional(mExperienceWorldId, &UUID::write);
+    stream.writeOptional(mExperienceWorldName, &BinaryStream::writeString);
     stream.writeString(mCreatorId);
-    mTargetId.write(stream);
-    stream.writeString(mScenarioId);
-    stream.writeString(mServerId);
+    stream.writeOptional(mTargetId, &UUID::write);
+    stream.writeOptional(mScenarioId, &BinaryStream::writeString);
+    stream.writeOptional(mServerId, &BinaryStream::writeString);
 }
 
 Result<> GatheringsConfigurationJoinInfo::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(mExperienceId.read(stream));
     _SCULK_READ(stream.readString(mExperienceName));
-    _SCULK_READ(mExperienceWorldId.read(stream));
-    _SCULK_READ(stream.readString(mExperienceWorldName));
+    _SCULK_READ(stream.readOptional(mExperienceWorldId, &UUID::read));
+    _SCULK_READ(stream.readOptional(mExperienceWorldName, &ReadOnlyBinaryStream::readString));
     _SCULK_READ(stream.readString(mCreatorId));
-    _SCULK_READ(mTargetId.read(stream));
-    _SCULK_READ(stream.readString(mScenarioId));
-    return stream.readString(mServerId);
+    _SCULK_READ(stream.readOptional(mTargetId, &UUID::read));
+    _SCULK_READ(stream.readOptional(mScenarioId, &ReadOnlyBinaryStream::readString));
+    return stream.readOptional(mServerId, &ReadOnlyBinaryStream::readString);
 }
 
 void GatheringsConfigurationClientStoreEntryPointInfo::write(BinaryStream& stream) const {

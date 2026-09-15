@@ -13,6 +13,10 @@ namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
 class LevelEventPacket : public IPacket {
 public:
+    static constexpr std::int32_t ParticleOrangePoplarLeaves = 0x4000 + 102;
+    static constexpr std::int32_t ParticleRedPoplarLeaves    = 0x4000 + 103;
+    static constexpr std::int32_t ParticleYellowPoplarLeaves = 0x4000 + 104;
+
     std::int32_t mEventType{};
     Vec3         mPosition{};
     std::int32_t mEventData{};

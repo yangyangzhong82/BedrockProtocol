@@ -19,6 +19,7 @@ option(PROTOCOL_ENABLE_AUTHENTICATION "Enable authentication features" ON)
 option(PROTOCOL_ENABLE_CONNECTION "Enable connection features" ON)
 option(PROTOCOL_ENABLE_EXCEPTIONS "Enable C++ exceptions for Protocol target" ON)
 option(PROTOCOL_ENABLE_FORMATTING "Enable string formatting support for Protocol target" OFF)
+option(PROTOCOL_BUILD_TESTS "Build protocol interoperability tests" OFF)
 
 if(PROTOCOL_ENABLE_CONNECTION AND(NOT PROTOCOL_ENABLE_CODEC OR NOT PROTOCOL_ENABLE_AUTHENTICATION))
     message(FATAL_ERROR
@@ -284,6 +285,21 @@ else()
         $<$<CONFIG:Release>:-O3>
         $<$<CONFIG:RelWithDebInfo>:-O3>
     )
+endif()
+
+if(PROTOCOL_BUILD_TESTS)
+    if(NOT PROTOCOL_ENABLE_CODEC)
+        message(FATAL_ERROR "Protocol tests require PROTOCOL_ENABLE_CODEC=ON")
+    endif()
+    enable_testing()
+    add_executable(Protocol2168Tests tests/Protocol2168Tests.cpp)
+    target_link_libraries(Protocol2168Tests PRIVATE Protocol::Protocol)
+    if(MSVC)
+        target_compile_options(Protocol2168Tests PRIVATE /utf-8 /GR-)
+    else()
+        target_compile_options(Protocol2168Tests PRIVATE -fno-rtti)
+    endif()
+    add_test(NAME Protocol2168 COMMAND Protocol2168Tests "${PROJECT_SOURCE_DIR}/tests/reference/gophertunnel-2168.txt")
 endif()
 
 install(TARGETS Protocol

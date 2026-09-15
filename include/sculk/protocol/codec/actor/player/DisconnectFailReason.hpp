@@ -155,8 +155,14 @@ enum class DisconnectFailReason : std::uint8_t {
     NonceNotValid                                 = 139,
     HostDisconnected                              = 140,
     EditorJoinIntentPolicyFailure                 = 141,
+    NetherNetIdentityNotAllowed                   = 142,
+    InvalidName                                   = 143,
+    ExpiredToken                                  = 144,
+    HostAcceptsNoTypeOfAuth                       = 145,
+    NotAuthenticatedFastFail                      = 146,
+    EditorNotAllowed                              = 147,
 };
 
 } // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE
 
-SCULK_PROTOCOL_ENUM_RANGE(DisconnectFailReason, 0, 141)
+SCULK_PROTOCOL_ENUM_RANGE(DisconnectFailReason, 0, 147)

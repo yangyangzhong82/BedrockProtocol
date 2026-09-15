@@ -579,9 +579,12 @@ enum class LevelSoundEvent : std::uint16_t {
     BUCKET__EMPTY__LAND_ANIMAL                   = 608,
     GEYSER_CONTINUOUS_ERUPTION_START             = 609,
     GEYSER_CONTINUOUS_ERUPTION_ACTIVE            = 610,
-    UNDEFINED                                    = 611,
+    MOUNT                                        = 611,
+    DISMOUNT                                     = 612,
+    STRAW_BED_BREAK_LEAVE                        = 613,
+    UNDEFINED                                    = 614,
 };
 
 } // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE
 
-SCULK_PROTOCOL_ENUM_RANGE(LevelSoundEvent, 0, 611)
+SCULK_PROTOCOL_ENUM_RANGE(LevelSoundEvent, 0, 614)

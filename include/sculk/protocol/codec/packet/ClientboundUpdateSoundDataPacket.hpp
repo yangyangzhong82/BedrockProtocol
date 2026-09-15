@@ -13,7 +13,22 @@ namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 class ClientboundUpdateSoundDataPacket : public IPacket {
 public:
     std::uint64_t mHandle{};
-    std::string   mSoundEvent{};
+    struct SoundUpdate {
+        enum class Type : std::uint32_t { Stop, SetVolume, SetPitch, Fade, SeekTo, Pause, Resume };
+        Type  mType{};
+        float mValue{};        // Volume, pitch, fade duration, or seek position (seconds).
+        float mTargetVolume{}; // Only present for Fade, after the duration.
+
+        void                   write(BinaryStream& stream) const;
+        [[nodiscard]] Result<> read(ReadOnlyBinaryStream& stream);
+    };
+    std::optional<SoundUpdate> mStop{};
+    std::optional<SoundUpdate> mSetVolume{};
+    std::optional<SoundUpdate> mSetPitch{};
+    std::optional<SoundUpdate> mFade{};
+    std::optional<SoundUpdate> mSeekTo{};
+    std::optional<SoundUpdate> mPause{};
+    std::optional<SoundUpdate> mResume{};
 
 public:
     [[nodiscard]] MinecraftPacketIds getId() const noexcept override;

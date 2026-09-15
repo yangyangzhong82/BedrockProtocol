@@ -20,9 +20,9 @@ struct MapTrackedActorUniqueId {
         Other       = 2,
     };
 
-    Type         mType{};
-    std::int64_t mActorUniqueId{};
-    BlockPos     mBlockPosition{};
+    Type                        mType{};
+    std::optional<std::int64_t> mActorUniqueId{};
+    std::optional<BlockPos>     mBlockPosition{};
 
     void write(BinaryStream& stream) const;
 

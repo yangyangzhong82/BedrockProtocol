@@ -6,51 +6,67 @@
 // SPDX-License-Identifier: MPL-2.0
 
 #include "sculk/protocol/codec/packet/SetScorePacket.hpp"
+#include "sculk/protocol/codec/utility/Cereal.hpp"
 #ifdef SCULK_PROTOCOL_ENABLE_FORMATTING
 #include "../utility/Format.hpp"
 #endif
 
 namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
-void SetScorePacket::ScoreInfo::write(BinaryStream& stream, PacketType type) const {
+namespace {
+constexpr std::string_view scoreNames[] = {"remove", "changeplayer", "changeentity", "changefakeplayer"};
+}
+
+void SetScorePacket::ScoreInfo::write(BinaryStream& stream, bool use26_44Format) const {
+    const auto type = static_cast<std::uint32_t>(mIdentityType);
+    stream.writeUnsignedVarInt(type);
+    stream.writeString(type < 4 ? scoreNames[type] : "");
     stream.writeVarInt64(mScoreboardId);
-    stream.writeString(mObjectiveName);
-    stream.writeSignedInt(mScoreValue);
-    if (type == PacketType::Change) {
-        stream.writeEnum(mIdentityType, &BinaryStream::writeByte);
-        switch (mIdentityType) {
-        case IdentityType::Player:
-        case IdentityType::Entity:
-            stream.writeVarInt64(mActorUniqueId);
-            break;
-        case IdentityType::FakePlayer:
-            stream.writeString(mFakePlayerName);
-            break;
-        default:
-            break;
+    if (mIdentityType == IdentityType::Invalid) {
+        if (use26_44Format) {
+            writeDoubleOptional(stream, mObjectiveName, &BinaryStream::writeString);
+        } else {
+            stream.writeOptional(mObjectiveName, &BinaryStream::writeString);
         }
+        return;
+    }
+    stream.writeString(mObjectiveName.value_or(""));
+    stream.writeSignedInt(mScoreValue);
+    if (mIdentityType == IdentityType::FakePlayer) {
+        stream.writeString(mFakePlayerName);
+    } else {
+        stream.writeVarInt64(mActorUniqueId);
     }
 }
 
-Result<> SetScorePacket::ScoreInfo::read(ReadOnlyBinaryStream& stream, PacketType type) {
-    _SCULK_READ(stream.readVarInt64(mScoreboardId));
-    _SCULK_READ(stream.readString(mObjectiveName));
-    _SCULK_READ(stream.readSignedInt(mScoreValue));
-    if (type == PacketType::Change) {
-        _SCULK_READ(stream.readEnum(mIdentityType, &ReadOnlyBinaryStream::readByte));
-        switch (mIdentityType) {
-        case IdentityType::Player:
-        case IdentityType::Entity:
-            _SCULK_READ(stream.readVarInt64(mActorUniqueId));
-            break;
-        case IdentityType::FakePlayer:
-            _SCULK_READ(stream.readString(mFakePlayerName));
-            break;
-        default:
-            break;
-        }
+Result<> SetScorePacket::ScoreInfo::read(ReadOnlyBinaryStream& stream, bool use26_44Format) {
+    std::uint32_t type{};
+    _SCULK_READ(stream.readUnsignedVarInt(type));
+    if (type >= 4) {
+        return error_utils::makeError("Invalid score variant");
     }
-    return {};
+    std::string name{};
+    _SCULK_READ(stream.readString(name));
+    if (name != scoreNames[type]) {
+        return error_utils::makeError("Mismatched score variant name");
+    }
+    mIdentityType = static_cast<IdentityType>(type);
+    _SCULK_READ(stream.readVarInt64(mScoreboardId));
+    mScoreValue    = 0;
+    mActorUniqueId = 0;
+    mFakePlayerName.clear();
+    if (mIdentityType == IdentityType::Invalid) {
+        if (use26_44Format) {
+            return readDoubleOptional(stream, mObjectiveName, &ReadOnlyBinaryStream::readString);
+        }
+        return stream.readOptional(mObjectiveName, &ReadOnlyBinaryStream::readString);
+    }
+    _SCULK_READ(stream.readString(mObjectiveName.emplace()));
+    _SCULK_READ(stream.readSignedInt(mScoreValue));
+    if (mIdentityType == IdentityType::FakePlayer) {
+        return stream.readString(mFakePlayerName);
+    }
+    return stream.readVarInt64(mActorUniqueId);
 }
 
 MinecraftPacketIds SetScorePacket::getId() const noexcept { return MinecraftPacketIds::SetScore; }
@@ -58,27 +74,19 @@ MinecraftPacketIds SetScorePacket::getId() const noexcept { return MinecraftPack
 std::string_view SetScorePacket::getName() const noexcept { return "SetScorePacket"; }
 
 void SetScorePacket::write(BinaryStream& stream) const {
-    stream.writeEnum(mPacketType, &BinaryStream::writeByte);
-    stream.writeArray(
-        mScoresInfo,
-        &BinaryStream::writeUnsignedVarInt,
-        [this](BinaryStream& stream, const ScoreInfo& info) { info.write(stream, mPacketType); }
-    );
+    stream.writeArray(mScoresInfo, [this](const ScoreInfo& info, BinaryStream& stream) {
+        info.write(stream, mUse26_44Format);
+    });
 }
 
 Result<> SetScorePacket::read(ReadOnlyBinaryStream& stream) {
-    _SCULK_READ(stream.readEnum(mPacketType, &ReadOnlyBinaryStream::readByte));
-    return stream.readArray(
-        mScoresInfo,
-        &ReadOnlyBinaryStream::readUnsignedVarInt,
-        [this](ReadOnlyBinaryStream& stream, ScoreInfo& info) { return info.read(stream, mPacketType); }
-    );
+    return stream.readArray(mScoresInfo, [this](ScoreInfo& info, ReadOnlyBinaryStream& stream) {
+        return info.read(stream, mUse26_44Format);
+    });
 }
 
 #ifdef SCULK_PROTOCOL_ENABLE_FORMATTING
-std::string SetScorePacket::toString() const {
-    return SCULK_FORMAT_PACKET(SCULK_FORMAT_FIELD(mPacketType), SCULK_FORMAT_FIELD(mScoresInfo));
-}
+std::string SetScorePacket::toString() const { return SCULK_FORMAT_PACKET(SCULK_FORMAT_FIELD(mScoresInfo)); }
 #endif
 
 } // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE

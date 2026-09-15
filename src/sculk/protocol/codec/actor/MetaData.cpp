@@ -12,8 +12,10 @@ namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 void MetaData::write(BinaryStream& stream) const {
     stream.writeArray(mDataItems, [](const DataItem& item, BinaryStream& stream) {
         stream.writeEnum(item.mId, &BinaryStream::writeUnsignedVarInt);
+        stream.writeEnum(item.mData.type(), &BinaryStream::writeUnsignedVarInt);
         stream.writeVariant(
             item.mData,
+            &BinaryStream::writeByte,
             Overload{
                 [&](uint8_t data) { stream.writeByte(data); },
                 [&](short data) { stream.writeSignedShort(data); },
@@ -30,10 +32,13 @@ void MetaData::write(BinaryStream& stream) const {
 }
 
 Result<> MetaData::read(ReadOnlyBinaryStream& stream) {
-    return stream.readArray(mDataItems, [](DataItem& item, ReadOnlyBinaryStream& stream) {
+    return stream.readArray(mDataItems, [](DataItem& item, ReadOnlyBinaryStream& stream) -> Result<> {
         _SCULK_READ(stream.readEnum(item.mId, &ReadOnlyBinaryStream::readUnsignedVarInt));
-        return stream.readVariant(
+        std::uint32_t variant{};
+        _SCULK_READ(stream.readUnsignedVarInt(variant));
+        _SCULK_READ(stream.readVariant(
             item.mData,
+            &ReadOnlyBinaryStream::readByte,
             Overload{
                 [&](uint8_t& data) { return stream.readByte(data); },
                 [&](short& data) { return stream.readSignedShort(data); },
@@ -45,7 +50,11 @@ Result<> MetaData::read(ReadOnlyBinaryStream& stream) {
                 [&](int64_t& data) { return stream.readVarInt64(data); },
                 [&](Vec3& data) { return data.read(stream); },
             }
-        );
+        ));
+        if (variant != static_cast<std::uint32_t>(item.mData.type())) {
+            return error_utils::makeError("Mismatched actor data variant");
+        }
+        return Result<>{};
     });
 }
 

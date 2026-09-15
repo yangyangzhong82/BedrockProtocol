@@ -19,51 +19,27 @@ std::string_view LevelChunkPacket::getName() const noexcept { return "LevelChunk
 void LevelChunkPacket::write(BinaryStream& stream) const {
     mPosition.write(stream);
     stream.writeVarInt(mDimensionId);
-
+    stream.writeUnsignedVarInt(mSubChunksCount);
+    stream.writeBool(mClientNeedsToRequestSubchunks);
     if (mClientNeedsToRequestSubchunks) {
-        if (mClientRequestSubChunkLimit < 0) {
-            stream.writeUnsignedVarInt(0xFFFFFFFFu);
-        } else {
-            stream.writeUnsignedVarInt(0xFFFFFFFEu);
-            stream.writeSignedShort(mClientRequestSubChunkLimit);
-        }
-    } else {
-        stream.writeUnsignedVarInt(mSubChunksCount);
+        stream.writeVarInt(mClientRequestSubChunkLimit);
     }
-
-    stream.writeOptional(mCacheBlobs, [&](BinaryStream& stream, const std::vector<std::uint64_t>& blobs) {
-        stream.writeArray(blobs, &BinaryStream::writeUnsignedInt64);
-    });
-
+    stream.writeBool(mCacheEnabled);
+    stream.writeArray(mCacheBlobs, &BinaryStream::writeUnsignedInt64);
     stream.writeString(mSerializedChunk);
 }
 
 Result<> LevelChunkPacket::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(mPosition.read(stream));
     _SCULK_READ(stream.readVarInt(mDimensionId));
-
-    std::uint32_t subChunkCount{};
-    _SCULK_READ(stream.readUnsignedVarInt(subChunkCount));
-
-    if (subChunkCount == 0xFFFFFFFEu) {
-        mClientNeedsToRequestSubchunks = true;
-        _SCULK_READ(stream.readSignedShort(mClientRequestSubChunkLimit));
-    } else {
-        if (subChunkCount == 0xFFFFFFFFu) {
-            mClientNeedsToRequestSubchunks = true;
-            mSubChunksCount                = 0;
-            mClientRequestSubChunkLimit    = -1;
-        } else {
-            mClientNeedsToRequestSubchunks = false;
-            mSubChunksCount                = subChunkCount;
-            mClientRequestSubChunkLimit    = 0;
-        }
+    _SCULK_READ(stream.readUnsignedVarInt(mSubChunksCount));
+    _SCULK_READ(stream.readBool(mClientNeedsToRequestSubchunks));
+    mClientRequestSubChunkLimit = 0;
+    if (mClientNeedsToRequestSubchunks) {
+        _SCULK_READ(stream.readVarInt(mClientRequestSubChunkLimit));
     }
-
-    _SCULK_READ(stream.readOptional(mCacheBlobs, [&](ReadOnlyBinaryStream& stream, std::vector<std::uint64_t>& blobs) {
-        return stream.readArray(blobs, &ReadOnlyBinaryStream::readUnsignedInt64);
-    }));
-
+    _SCULK_READ(stream.readBool(mCacheEnabled));
+    _SCULK_READ(stream.readArray(mCacheBlobs, &ReadOnlyBinaryStream::readUnsignedInt64));
     return stream.readString(mSerializedChunk);
 }
 
@@ -77,6 +53,7 @@ std::string LevelChunkPacket::toString() const {
         SCULK_FORMAT_FIELD(mSubChunksCount),
         SCULK_FORMAT_FIELD(mClientNeedsToRequestSubchunks),
         SCULK_FORMAT_FIELD(mClientRequestSubChunkLimit),
+        SCULK_FORMAT_FIELD(mCacheEnabled),
         SCULK_FORMAT_FIELD(mCacheBlobs)
     );
 }

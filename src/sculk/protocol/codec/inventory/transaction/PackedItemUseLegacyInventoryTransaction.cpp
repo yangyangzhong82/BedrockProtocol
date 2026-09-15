@@ -11,18 +11,34 @@ namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
 void PackedItemUseLegacyInventoryTransaction::write(BinaryStream& stream) const {
     stream.writeVarInt(mLegacyRequestRawId);
-    if (mLegacyRequestRawId < -1 && (mLegacyRequestRawId & 1) == 0) {
-        stream.writeArray(mLegacySetItemSlots, &LegacySetItemSlot::write);
+    stream.writeOptional(mLegacySetItemSlots, [](BinaryStream& stream, const auto& slots) {
+        stream.writeArray(slots, &LegacySetItemSlot::write);
+    });
+    stream.writeBool(true);
+    stream.writeBool(mHasActions);
+    if (mHasActions) {
+        mItemUseTransaction.write(stream);
+    } else {
+        mItemUseTransaction.writeWithoutActions(stream);
     }
-    mItemUseTransaction.writeLegacy(stream);
 }
 
 Result<> PackedItemUseLegacyInventoryTransaction::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readVarInt(mLegacyRequestRawId));
-    if (mLegacyRequestRawId < -1 && (mLegacyRequestRawId & 1) == 0) {
-        _SCULK_READ(stream.readArray(mLegacySetItemSlots, &LegacySetItemSlot::read));
+    _SCULK_READ(stream.readOptional(mLegacySetItemSlots, [](ReadOnlyBinaryStream& stream, auto& slots) {
+        return stream.readArray(slots, &LegacySetItemSlot::read);
+    }));
+    bool outer{}, hasActions{};
+    _SCULK_READ(stream.readBool(outer));
+    if (outer) {
+        _SCULK_READ(stream.readBool(hasActions));
     }
-    return mItemUseTransaction.readLegacy(stream);
+    mHasActions = hasActions;
+    if (hasActions) {
+        return mItemUseTransaction.read(stream);
+    }
+    mItemUseTransaction.mTransaction.mActions.clear();
+    return mItemUseTransaction.readWithoutActions(stream);
 }
 
 } // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE

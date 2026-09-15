@@ -6,15 +6,17 @@
 // SPDX-License-Identifier: MPL-2.0
 
 #pragma once
+#include "sculk/protocol/codec/level/ServerConfiguration.hpp"
 #include "sculk/protocol/codec/packet/IPacket.hpp"
 
 namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
 class TransferPacket : public IPacket {
 public:
-    std::string   mServerAddress{};
-    std::uint16_t mServerPort{};
-    bool          mReloadWorld{};
+    std::string                                    mServerAddress{};
+    std::uint16_t                                  mServerPort{};
+    bool                                           mReloadWorld{};
+    std::optional<GatheringsConfigurationJoinInfo> mGatheringsConfiguration{};
 
 public:
     [[nodiscard]] MinecraftPacketIds getId() const noexcept override;

@@ -18,25 +18,25 @@ namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
 class PlayerAuthInputPacket : public IPacket {
 public:
-    Vec2                                    mPlayerRotation{};
-    Vec3                                    mPosition{};
-    Vec2                                    mMoveVector{};
-    float                                   mPlayerHeadRotation{};
-    std::bitset<65>                         mInputData{};
-    std::uint32_t                           mInputType{};
-    std::uint32_t                           mPlayMode{};
-    std::uint32_t                           mNewInteractionModel{};
-    Vec2                                    mInteractRotation{};
-    std::uint64_t                           mClientTick{};
-    Vec3                                    mPosDelta{};
-    PackedItemUseLegacyInventoryTransaction mItemUseTransaction{};
-    ItemStackRequestData                    mItemStackRequestData{};
-    PlayerBlockActions                      mPlayerBlockActions{};
-    Vec2                                    mVehicleRotation{};
-    std::int64_t                            mClientPredictedVihicle{};
-    Vec2                                    mAnologMoveVector{};
-    Vec3                                    mCameraOrientation{};
-    Vec2                                    mRawMoveVector{};
+    Vec2                                                   mPlayerRotation{};
+    Vec3                                                   mPosition{};
+    Vec2                                                   mMoveVector{};
+    float                                                  mPlayerHeadRotation{};
+    std::optional<std::bitset<66>>                         mInputData{};
+    std::uint32_t                                          mInputType{};
+    std::uint32_t                                          mPlayMode{};
+    std::int32_t                                           mNewInteractionModel{};
+    Vec2                                                   mInteractRotation{};
+    std::uint64_t                                          mClientTick{};
+    Vec3                                                   mPosDelta{};
+    std::optional<PackedItemUseLegacyInventoryTransaction> mItemUseTransaction{};
+    std::optional<ItemStackRequestData>                    mItemStackRequestData{};
+    std::optional<PlayerBlockActions>                      mPlayerBlockActions{};
+    std::optional<Vec2>                                    mVehicleRotation{};
+    std::optional<std::int64_t>                            mClientPredictedVihicle{};
+    Vec2                                                   mAnologMoveVector{};
+    Vec3                                                   mCameraOrientation{};
+    Vec2                                                   mRawMoveVector{};
 
 public:
     [[nodiscard]] MinecraftPacketIds getId() const noexcept override;

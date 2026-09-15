@@ -44,10 +44,10 @@ public:
     };
 
     struct HeightmapData {
-        HeightMapDataType                           mHeightMapType{};
-        std::array<std::array<std::int8_t, 16>, 16> mSubchunkHeightMap{};
-        HeightMapDataType                           mRenderHeightMapType{};
-        std::array<std::array<std::int8_t, 16>, 16> mRenderHeightMap{};
+        HeightMapDataType                                          mHeightMapType{};
+        std::optional<std::array<std::array<std::int8_t, 16>, 16>> mSubchunkHeightMap{};
+        HeightMapDataType                                          mRenderHeightMapType{};
+        std::optional<std::array<std::array<std::int8_t, 16>, 16>> mRenderHeightMap{};
 
         void write(BinaryStream& stream) const;
 
@@ -55,15 +55,15 @@ public:
     };
 
     struct SubChunkPacketData {
-        SubChunkPosOffset     mSubChunkPosOffset{};
-        std::string           mSerializedSubChunk{};
-        SubChunkRequestResult mResult{};
-        HeightmapData         mHeightMapData{};
-        std::uint64_t         mBlobId{};
+        SubChunkPosOffset            mSubChunkPosOffset{};
+        std::optional<std::string>   mSerializedSubChunk{};
+        SubChunkRequestResult        mResult{};
+        HeightmapData                mHeightMapData{};
+        std::optional<std::uint64_t> mBlobId{};
 
-        void write(BinaryStream& stream, bool cacheEnabled) const;
+        void write(BinaryStream& stream) const;
 
-        [[nodiscard]] Result<> read(ReadOnlyBinaryStream& stream, bool cacheEnabled);
+        [[nodiscard]] Result<> read(ReadOnlyBinaryStream& stream);
     };
 
 public:

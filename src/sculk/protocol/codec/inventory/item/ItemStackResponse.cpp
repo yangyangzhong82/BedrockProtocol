@@ -6,6 +6,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 #include "sculk/protocol/codec/inventory/item/ItemStackResponse.hpp"
+#include "sculk/protocol/codec/utility/Cereal.hpp"
 
 namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
@@ -13,9 +14,9 @@ void ItemStackResponseSlotInfo::write(BinaryStream& stream) const {
     stream.writeByte(mRequestedSlot);
     stream.writeByte(mSlot);
     stream.writeByte(mAmount);
-    stream.writeVarInt(mNetId);
+    writeDoubleOptional(stream, mNetId, &BinaryStream::writeVarInt);
     stream.writeString(mCustomName);
-    stream.writeString(mFilteredCustomName);
+    stream.writeOptional(mFilteredCustomName, &BinaryStream::writeString);
     stream.writeVarInt(mDurationCorrection);
 }
 
@@ -23,10 +24,14 @@ Result<> ItemStackResponseSlotInfo::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readByte(mRequestedSlot));
     _SCULK_READ(stream.readByte(mSlot));
     _SCULK_READ(stream.readByte(mAmount));
-    _SCULK_READ(stream.readVarInt(mNetId));
+    _SCULK_READ(readDoubleOptional(stream, mNetId, &ReadOnlyBinaryStream::readVarInt));
     _SCULK_READ(stream.readString(mCustomName));
-    _SCULK_READ(stream.readString(mFilteredCustomName));
-    return stream.readVarInt(mDurationCorrection);
+    _SCULK_READ(stream.readOptional(mFilteredCustomName, &ReadOnlyBinaryStream::readString));
+    _SCULK_READ(stream.readVarInt(mDurationCorrection));
+    if (mDurationCorrection < -32768 || mDurationCorrection > 32767) {
+        return error_utils::makeError("Durability correction out of range");
+    }
+    return {};
 }
 
 void ItemStackResponseContainerInfo::write(BinaryStream& stream) const {
@@ -42,18 +47,17 @@ Result<> ItemStackResponseContainerInfo::read(ReadOnlyBinaryStream& stream) {
 void ItemStackResponseInfo::write(BinaryStream& stream) const {
     stream.writeEnum(mResult, &BinaryStream::writeByte);
     stream.writeVarInt(mRequestId);
-    if (mResult == ItemStackNetResult::Success) {
-        stream.writeArray(mContainers, &ItemStackResponseContainerInfo::write);
-    }
+    writeDoubleOptional(stream, mContainers, [](BinaryStream& stream, const auto& containers) {
+        stream.writeArray(containers, &ItemStackResponseContainerInfo::write);
+    });
 }
 
 Result<> ItemStackResponseInfo::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readEnum(mResult, &ReadOnlyBinaryStream::readByte));
     _SCULK_READ(stream.readVarInt(mRequestId));
-    if (mResult == ItemStackNetResult::Success) {
-        return stream.readArray(mContainers, &ItemStackResponseContainerInfo::read);
-    }
-    return {};
+    return readDoubleOptional(stream, mContainers, [](ReadOnlyBinaryStream& stream, auto& containers) {
+        return stream.readArray(containers, &ItemStackResponseContainerInfo::read);
+    });
 }
 
 void ItemStackResponse::write(BinaryStream& stream) const {

@@ -9,46 +9,16 @@
 
 namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
-void NetworkItemStackDescriptor::write(BinaryStream& stream) const {
-    if (mId == 0) {
-        stream.writeVarInt(0);
-    } else {
-        stream.writeVarInt(mId);
-        stream.writeUnsignedShort(mStackSize);
-        stream.writeUnsignedVarInt(mAux);
-        stream.writeOptional(mNetId, [&](BinaryStream& stream, const NetIdVariant& var) {
-            std::visit([&](const auto& value) { stream.writeVarInt(value.mId); }, var);
-        });
-        stream.writeVarInt(mBlockRuntimeId);
-        stream.writeString(mUserData);
-    }
-}
+void NetworkItemStackDescriptor::write(BinaryStream& stream) const { writeCereal(stream); }
 
-[[nodiscard]] Result<> NetworkItemStackDescriptor::read(ReadOnlyBinaryStream& stream) {
-    int id{};
-    _SCULK_READ(stream.readVarInt(id));
-    mId = static_cast<short>(id);
-    if (mId == 0) {
-        return {}; // Empty item stack
-    } else {
-        _SCULK_READ(stream.readUnsignedShort(mStackSize));
-        _SCULK_READ(stream.readUnsignedVarInt(mAux));
-        _SCULK_READ(stream.readOptional(mNetId, [&](ReadOnlyBinaryStream& stream, NetIdVariant& var) {
-            return std::visit([&](auto& value) { return stream.readVarInt(value.mId); }, var);
-        }));
-        int blockRuntimeId{};
-        _SCULK_READ(stream.readVarInt(blockRuntimeId));
-        mBlockRuntimeId = static_cast<std::uint32_t>(blockRuntimeId);
-        return stream.readString(mUserData);
-    }
-}
+[[nodiscard]] Result<> NetworkItemStackDescriptor::read(ReadOnlyBinaryStream& stream) { return readCereal(stream); }
 
 void NetworkItemStackDescriptor::writeCereal(BinaryStream& stream) const {
     stream.writeSignedShort(mId);
     stream.writeUnsignedShort(mStackSize);
     stream.writeUnsignedVarInt(mAux);
     stream.writeOptional(mNetId, [&](BinaryStream& stream, const NetIdVariant& var) {
-        stream.writeVariant(var, [&stream](const auto& value) { stream.writeVarInt(value.mId); });
+        std::visit([&stream](const auto& value) { stream.writeVarInt(value.mId); }, var);
     });
     stream.writeUnsignedVarInt(mBlockRuntimeId);
     stream.writeString(mUserData);
@@ -59,7 +29,16 @@ void NetworkItemStackDescriptor::writeCereal(BinaryStream& stream) const {
     _SCULK_READ(stream.readUnsignedShort(mStackSize));
     _SCULK_READ(stream.readUnsignedVarInt(mAux));
     _SCULK_READ(stream.readOptional(mNetId, [&](ReadOnlyBinaryStream& stream, NetIdVariant& var) {
-        return stream.readVariant(var, [&stream](auto& value) { return stream.readVarInt(value.mId); });
+        std::int32_t id{};
+        _SCULK_READ(stream.readVarInt(id));
+        if (id >= 0) {
+            var = ItemStackNetId{id};
+        } else if ((id & 1) != 0) {
+            var = ItemStackRequestId{id};
+        } else {
+            var = ItemStackLegacyRequestId{id};
+        }
+        return Result<>{};
     }));
     _SCULK_READ(stream.readUnsignedVarInt(mBlockRuntimeId));
     return stream.readString(mUserData);

@@ -19,13 +19,13 @@ enum class ItemStackNetResult : std::uint8_t {
 };
 
 struct ItemStackResponseSlotInfo {
-    std::uint8_t mRequestedSlot{};
-    std::uint8_t mSlot{};
-    std::uint8_t mAmount{};
-    std::int32_t mNetId{};
-    std::string  mCustomName{};
-    std::string  mFilteredCustomName{};
-    std::int32_t mDurationCorrection{};
+    std::uint8_t                mRequestedSlot{};
+    std::uint8_t                mSlot{};
+    std::uint8_t                mAmount{};
+    std::optional<std::int32_t> mNetId{};
+    std::string                 mCustomName{};
+    std::optional<std::string>  mFilteredCustomName{};
+    std::int32_t                mDurationCorrection{};
 
     void write(BinaryStream& stream) const;
 
@@ -42,9 +42,9 @@ struct ItemStackResponseContainerInfo {
 };
 
 struct ItemStackResponseInfo {
-    ItemStackNetResult                          mResult{};
-    std::int32_t                                mRequestId{};
-    std::vector<ItemStackResponseContainerInfo> mContainers{};
+    ItemStackNetResult                                         mResult{};
+    std::int32_t                                               mRequestId{};
+    std::optional<std::vector<ItemStackResponseContainerInfo>> mContainers{};
 
     void write(BinaryStream& stream) const;
 

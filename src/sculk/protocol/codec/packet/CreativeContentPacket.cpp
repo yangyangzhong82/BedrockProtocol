@@ -25,13 +25,13 @@ Result<> CreativeContentPacket::WriteEntry::read(ReadOnlyBinaryStream& stream) {
 }
 
 void CreativeContentPacket::Group::write(BinaryStream& stream) const {
-    stream.writeSignedInt(mCategory);
+    stream.writeByte(mCategory);
     stream.writeString(mName);
     mIcon.write(stream);
 }
 
 Result<> CreativeContentPacket::Group::read(ReadOnlyBinaryStream& stream) {
-    _SCULK_READ(stream.readSignedInt(mCategory));
+    _SCULK_READ(stream.readByte(mCategory));
     _SCULK_READ(stream.readString(mName));
     return mIcon.read(stream);
 }

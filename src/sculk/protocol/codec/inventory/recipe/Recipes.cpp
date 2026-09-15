@@ -10,18 +10,17 @@
 namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
 void RecipeUnlockingRequirement::write(BinaryStream& stream) const {
-    stream.writeEnum(mUnlockingContext, &BinaryStream::writeByte);
-    if (mUnlockingContext == UnlockingContext::None) {
-        stream.writeArray(mUnlockingIngredients, &RecipeIngredient::write);
-    }
+    stream.writeEnum(mUnlockingContext, &BinaryStream::writeVarInt);
+    stream.writeOptional(mUnlockingIngredients, [](BinaryStream& stream, const auto& ingredients) {
+        stream.writeArray(ingredients, &RecipeIngredient::write);
+    });
 }
 
 Result<> RecipeUnlockingRequirement::read(ReadOnlyBinaryStream& stream) {
-    _SCULK_READ(stream.readEnum(mUnlockingContext, &ReadOnlyBinaryStream::readByte));
-    if (mUnlockingContext == UnlockingContext::None) {
-        return stream.readArray(mUnlockingIngredients, &RecipeIngredient::read);
-    }
-    return {};
+    _SCULK_READ(stream.readEnum(mUnlockingContext, &ReadOnlyBinaryStream::readVarInt));
+    return stream.readOptional(mUnlockingIngredients, [](ReadOnlyBinaryStream& stream, auto& ingredients) {
+        return stream.readArray(ingredients, &RecipeIngredient::read);
+    });
 }
 
 void ShapelessRecipe::write(BinaryStream& stream) const {
@@ -31,7 +30,7 @@ void ShapelessRecipe::write(BinaryStream& stream) const {
     mRecipeId.write(stream);
     stream.writeString(mRecipeTag);
     stream.writeVarInt(mPriority);
-    mUnlockingRequirement.write(stream);
+    stream.writeOptional(mUnlockingRequirement, &RecipeUnlockingRequirement::write);
     stream.writeUnsignedVarInt(mNetId);
 }
 
@@ -42,7 +41,7 @@ Result<> ShapelessRecipe::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(mRecipeId.read(stream));
     _SCULK_READ(stream.readString(mRecipeTag));
     _SCULK_READ(stream.readVarInt(mPriority));
-    _SCULK_READ(mUnlockingRequirement.read(stream));
+    _SCULK_READ(stream.readOptional(mUnlockingRequirement, &RecipeUnlockingRequirement::read));
     return stream.readUnsignedVarInt(mNetId);
 }
 
@@ -50,15 +49,13 @@ void ShapedRecipe::write(BinaryStream& stream) const {
     stream.writeString(mRecipeUniqueId);
     stream.writeVarInt(mGridWidth);
     stream.writeVarInt(mGridHeight);
-    for (const RecipeIngredient& ingredient : mIngredientList) {
-        ingredient.write(stream);
-    }
+    stream.writeArray(mIngredientList, &RecipeIngredient::write);
     stream.writeArray(mProductionList, &NetworkItemInstanceDescriptor::write);
     mRecipeId.write(stream);
     stream.writeString(mRecipeTag);
     stream.writeVarInt(mPriority);
     stream.writeBool(mAssumeSymmetry);
-    mUnlockingRequirement.write(stream);
+    stream.writeOptional(mUnlockingRequirement, &RecipeUnlockingRequirement::write);
     stream.writeUnsignedVarInt(mNetId);
 }
 
@@ -66,26 +63,19 @@ Result<> ShapedRecipe::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readString(mRecipeUniqueId));
     _SCULK_READ(stream.readVarInt(mGridWidth));
     _SCULK_READ(stream.readVarInt(mGridHeight));
-    mIngredientList.resize(static_cast<std::size_t>(mGridWidth * mGridHeight));
-    for (RecipeIngredient& ingredient : mIngredientList) {
-        _SCULK_READ(ingredient.read(stream));
+    _SCULK_READ(stream.readArray(mIngredientList, &RecipeIngredient::read));
+    if (mGridWidth < 0 || mGridWidth > 3 || mGridHeight < 0 || mGridHeight > 3
+        || mIngredientList.size() != static_cast<std::size_t>(mGridWidth * mGridHeight)) {
+        return error_utils::makeError("Invalid shaped recipe dimensions");
     }
     _SCULK_READ(stream.readArray(mProductionList, &NetworkItemInstanceDescriptor::read));
     _SCULK_READ(mRecipeId.read(stream));
     _SCULK_READ(stream.readString(mRecipeTag));
     _SCULK_READ(stream.readVarInt(mPriority));
     _SCULK_READ(stream.readBool(mAssumeSymmetry));
-    _SCULK_READ(mUnlockingRequirement.read(stream));
+    _SCULK_READ(stream.readOptional(mUnlockingRequirement, &RecipeUnlockingRequirement::read));
     return stream.readUnsignedVarInt(mNetId);
 }
-
-void FurnaceRecipe::write(BinaryStream&) const {}
-
-Result<> FurnaceRecipe::read(ReadOnlyBinaryStream&) { return {}; }
-
-void FurnaceAuxRecipe::write(BinaryStream&) const {}
-
-Result<> FurnaceAuxRecipe::read(ReadOnlyBinaryStream&) { return {}; }
 
 void MultiRecipe::write(BinaryStream& stream) const {
     mMultiRecipe.write(stream);
@@ -104,7 +94,7 @@ void UserDataShapelessRecipe::write(BinaryStream& stream) const {
     mRecipeId.write(stream);
     stream.writeString(mRecipeTag);
     stream.writeVarInt(mPriority);
-    mUnlockingRequirement.write(stream);
+    stream.writeOptional(mUnlockingRequirement, &RecipeUnlockingRequirement::write);
     stream.writeUnsignedVarInt(mNetId);
 }
 
@@ -115,7 +105,7 @@ Result<> UserDataShapelessRecipe::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(mRecipeId.read(stream));
     _SCULK_READ(stream.readString(mRecipeTag));
     _SCULK_READ(stream.readVarInt(mPriority));
-    _SCULK_READ(mUnlockingRequirement.read(stream));
+    _SCULK_READ(stream.readOptional(mUnlockingRequirement, &RecipeUnlockingRequirement::read));
     return stream.readUnsignedVarInt(mNetId);
 }
 
@@ -126,6 +116,7 @@ void ShapelessChemistryRecipe::write(BinaryStream& stream) const {
     mRecipeId.write(stream);
     stream.writeString(mRecipeTag);
     stream.writeVarInt(mPriority);
+    stream.writeOptional(mUnlockingRequirement, &RecipeUnlockingRequirement::write);
     stream.writeUnsignedVarInt(mNetId);
 }
 
@@ -136,6 +127,7 @@ Result<> ShapelessChemistryRecipe::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(mRecipeId.read(stream));
     _SCULK_READ(stream.readString(mRecipeTag));
     _SCULK_READ(stream.readVarInt(mPriority));
+    _SCULK_READ(stream.readOptional(mUnlockingRequirement, &RecipeUnlockingRequirement::read));
     return stream.readUnsignedVarInt(mNetId);
 }
 
@@ -179,16 +171,6 @@ Result<> SmithingTrimRecipe::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(mAddition.read(stream));
     _SCULK_READ(stream.readString(mRecipeTag));
     return stream.readUnsignedVarInt(mNetId);
-}
-
-void CraftingDataEntry::write(BinaryStream& stream) const {
-    stream.writeVariant(mRecipe, &BinaryStream::writeVarInt, [&stream](auto&& recipe) { recipe.write(stream); });
-}
-
-Result<> CraftingDataEntry::read(ReadOnlyBinaryStream& stream) {
-    return stream.readVariant(mRecipe, &ReadOnlyBinaryStream::readVarInt, [&stream](auto&& recipe) {
-        return recipe.read(stream);
-    });
 }
 
 void PotionMixDataEntry::write(BinaryStream& stream) const {

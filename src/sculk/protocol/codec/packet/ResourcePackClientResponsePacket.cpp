@@ -12,6 +12,11 @@
 
 namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
+namespace {
+constexpr std::string_view responseNames[] =
+    {"cancel", "downloading", "downloadingfinished", "resourcepackstackfinished"};
+}
+
 MinecraftPacketIds ResourcePackClientResponsePacket::getId() const noexcept {
     return MinecraftPacketIds::ResourcePackClientResponse;
 }
@@ -21,13 +26,31 @@ std::string_view ResourcePackClientResponsePacket::getName() const noexcept {
 }
 
 void ResourcePackClientResponsePacket::write(BinaryStream& stream) const {
-    stream.writeByte(mResponse);
-    stream.writeArray(mPackIds, &BinaryStream::writeUnsignedShort, &BinaryStream::writeString);
+    const auto variant = static_cast<std::uint32_t>(mResponse - 1);
+    stream.writeUnsignedVarInt(variant);
+    stream.writeString(variant < 4 ? responseNames[variant] : "");
+    if (mResponse == Downloading) {
+        stream.writeArray(mPackIds, &BinaryStream::writeString);
+    }
 }
 
 Result<> ResourcePackClientResponsePacket::read(ReadOnlyBinaryStream& stream) {
-    _SCULK_READ(stream.readByte(mResponse));
-    return stream.readArray(mPackIds, &ReadOnlyBinaryStream::readUnsignedShort, &ReadOnlyBinaryStream::readString);
+    std::uint32_t variant{};
+    _SCULK_READ(stream.readUnsignedVarInt(variant));
+    if (variant >= 4) {
+        return error_utils::makeError("Invalid resource pack response");
+    }
+    std::string name{};
+    _SCULK_READ(stream.readString(name));
+    if (name != responseNames[variant]) {
+        return error_utils::makeError("Mismatched resource pack response name");
+    }
+    mResponse = static_cast<std::uint8_t>(variant + 1);
+    mPackIds.clear();
+    if (mResponse == Downloading) {
+        return stream.readArray(mPackIds, &ReadOnlyBinaryStream::readString);
+    }
+    return {};
 }
 
 #ifdef SCULK_PROTOCOL_ENABLE_FORMATTING

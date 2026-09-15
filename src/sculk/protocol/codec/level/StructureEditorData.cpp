@@ -11,24 +11,24 @@ namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
 void StructureEditorData::write(BinaryStream& stream) const {
     stream.writeString(mStructureName);
-    stream.writeString(mFilteredStructureName);
+    stream.writeOptional(mFilteredStructureName, &BinaryStream::writeString);
     stream.writeString(mDataField);
     stream.writeBool(mIncludePlayer);
     stream.writeBool(mShowBoundingBox);
     stream.writeVarInt(mStructureBlockType);
     mStructureSettings.write(stream);
-    stream.writeVarInt(mRedstoneSaveMode);
+    stream.writeByte(mRedstoneSaveMode);
 }
 
 Result<> StructureEditorData::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readString(mStructureName));
-    _SCULK_READ(stream.readString(mFilteredStructureName));
+    _SCULK_READ(stream.readOptional(mFilteredStructureName, &ReadOnlyBinaryStream::readString));
     _SCULK_READ(stream.readString(mDataField));
     _SCULK_READ(stream.readBool(mIncludePlayer));
     _SCULK_READ(stream.readBool(mShowBoundingBox));
     _SCULK_READ(stream.readVarInt(mStructureBlockType));
     _SCULK_READ(mStructureSettings.read(stream));
-    return stream.readVarInt(mRedstoneSaveMode);
+    return stream.readByte(mRedstoneSaveMode);
 }
 
 } // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE

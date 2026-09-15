@@ -1,6 +1,6 @@
 # 📄 Protocol
 
-![Protocol Version](https://img.shields.io/badge/Bedrock-v1001%20%7C%2026.30-30ffee?style=flat-square)   
+![Protocol Version](https://img.shields.io/badge/Bedrock-v2168%20%7C%2026.40-30ffee?style=flat-square)
 
 ![C++23](https://img.shields.io/badge/C%2B%2B-23-blue)
 ![CMake](https://img.shields.io/badge/CMake-3.20%2B-064f8c)
@@ -9,6 +9,8 @@
 [📄 English README](README.md)
 
 一个基于 C++23 的 Minecraft 基岩版网络协议库。
+
+[协议 2168 适配说明、API 迁移与验证](PROTOCOL_2168.md)
 
 Protocol 提供基岩版数据包模型、数据包 ID 映射，以及二进制读写工具，
 可用于构建高性能的服务端、代理、抓包分析器与协议测试工具。
@@ -126,7 +128,7 @@ int main() {
 ## 🧬 ABI 命名空间
 
 公开 API 通过内联 ABI 命名空间进行版本化，
-例如 `sculk::protocol::abi_v1001`。
+例如 `sculk::protocol::abi_v2168`。
 
 ## 🤝 欢迎贡献
 

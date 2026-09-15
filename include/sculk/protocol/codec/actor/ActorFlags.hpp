@@ -143,9 +143,10 @@ enum class ActorFlags : std::uint8_t {
     UsesLegacyFriction            = 127,
     UsesUniformAirDrag            = 128,
     NameplateDepthTested          = 129,
-    Count                         = 130,
+    NotPickableFromInside         = 130,
+    Count                         = 131,
 };
 
 } // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE
 
-SCULK_PROTOCOL_ENUM_RANGE(ActorFlags, 0, 130)
+SCULK_PROTOCOL_ENUM_RANGE(ActorFlags, 0, 131)

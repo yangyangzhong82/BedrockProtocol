@@ -20,52 +20,50 @@ std::string_view ClientboundMapItemDataPacket::getName() const noexcept { return
 
 void ClientboundMapItemDataPacket::write(BinaryStream& stream) const {
     stream.writeVarInt64(mMapId);
-    stream.writeEnum(mTypeFlag, &BinaryStream::writeUnsignedVarInt);
     stream.writeByte(mDimension);
     stream.writeBool(mIsLockedMap);
     mMapOrigin.write(stream);
-    if (static_cast<bool>(mTypeFlag & ClientboundMapItemDataType::Creation)) {
-        stream.writeArray(mMapEntries, &BinaryStream::writeVarInt64);
-    }
-    if (static_cast<bool>(mTypeFlag & ClientboundMapItemDataType::All)) {
-        stream.writeByte(mScale);
-    }
-    if (static_cast<bool>(mTypeFlag & ClientboundMapItemDataType::DecorationUpdate)) {
-        stream.writeArray(mTrackedActors, &MapTrackedActorUniqueId::write);
-        stream.writeArray(mDecorationList, &MapDecoration::write);
-    }
-    if (static_cast<bool>(mTypeFlag & ClientboundMapItemDataType::TextureUpdate)) {
-        stream.writeVarInt(mTextureWidth);
-        stream.writeVarInt(mTextureHeight);
-        stream.writeVarInt(mXTexCoordinate);
-        stream.writeVarInt(mYTexCoordinate);
-        stream.writeArray(mPixels, &BinaryStream::writeUnsignedVarInt);
-    }
+    stream.writeOptional(mMapEntries, [](BinaryStream& stream, const auto& values) {
+        stream.writeArray(values, &BinaryStream::writeVarInt64);
+    });
+    stream.writeOptional(mScale, &BinaryStream::writeByte);
+    stream.writeOptional(mTrackedActors, [](BinaryStream& stream, const auto& values) {
+        stream.writeArray(values, &MapTrackedActorUniqueId::write);
+    });
+    stream.writeOptional(mDecorationList, [](BinaryStream& stream, const auto& values) {
+        stream.writeArray(values, &MapDecoration::write);
+    });
+    stream.writeOptional(mTextureWidth, &BinaryStream::writeVarInt);
+    stream.writeOptional(mTextureHeight, &BinaryStream::writeVarInt);
+    stream.writeOptional(mXTexCoordinate, &BinaryStream::writeVarInt);
+    stream.writeOptional(mYTexCoordinate, &BinaryStream::writeVarInt);
+    stream.writeOptional(mPixels, [](BinaryStream& stream, const auto& values) {
+        stream.writeArray(values, &BinaryStream::writeUnsignedInt);
+    });
 }
 
 Result<> ClientboundMapItemDataPacket::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readVarInt64(mMapId));
-    _SCULK_READ(stream.readEnum(mTypeFlag, &ReadOnlyBinaryStream::readUnsignedVarInt));
     _SCULK_READ(stream.readByte(mDimension));
     _SCULK_READ(stream.readBool(mIsLockedMap));
     _SCULK_READ(mMapOrigin.read(stream));
-    if (static_cast<bool>(mTypeFlag & ClientboundMapItemDataType::Creation)) {
-        _SCULK_READ(stream.readArray(mMapEntries, &ReadOnlyBinaryStream::readVarInt64));
-    }
-    if (static_cast<bool>(mTypeFlag & ClientboundMapItemDataType::All)) {
-        _SCULK_READ(stream.readByte(mScale));
-    }
-    if (static_cast<bool>(mTypeFlag & ClientboundMapItemDataType::DecorationUpdate)) {
-        _SCULK_READ(stream.readArray(mTrackedActors, &MapTrackedActorUniqueId::read));
-        _SCULK_READ(stream.readArray(mDecorationList, &MapDecoration::read));
-    }
-    if (static_cast<bool>(mTypeFlag & ClientboundMapItemDataType::TextureUpdate)) {
-        _SCULK_READ(stream.readVarInt(mTextureWidth));
-        _SCULK_READ(stream.readVarInt(mTextureHeight));
-        _SCULK_READ(stream.readVarInt(mXTexCoordinate));
-        _SCULK_READ(stream.readVarInt(mYTexCoordinate));
-        _SCULK_READ(stream.readArray(mPixels, &ReadOnlyBinaryStream::readUnsignedVarInt));
-    }
+    _SCULK_READ(stream.readOptional(mMapEntries, [](ReadOnlyBinaryStream& stream, auto& values) {
+        return stream.readArray(values, &ReadOnlyBinaryStream::readVarInt64);
+    }));
+    _SCULK_READ(stream.readOptional(mScale, &ReadOnlyBinaryStream::readByte));
+    _SCULK_READ(stream.readOptional(mTrackedActors, [](ReadOnlyBinaryStream& stream, auto& values) {
+        return stream.readArray(values, &MapTrackedActorUniqueId::read);
+    }));
+    _SCULK_READ(stream.readOptional(mDecorationList, [](ReadOnlyBinaryStream& stream, auto& values) {
+        return stream.readArray(values, &MapDecoration::read);
+    }));
+    _SCULK_READ(stream.readOptional(mTextureWidth, &ReadOnlyBinaryStream::readVarInt));
+    _SCULK_READ(stream.readOptional(mTextureHeight, &ReadOnlyBinaryStream::readVarInt));
+    _SCULK_READ(stream.readOptional(mXTexCoordinate, &ReadOnlyBinaryStream::readVarInt));
+    _SCULK_READ(stream.readOptional(mYTexCoordinate, &ReadOnlyBinaryStream::readVarInt));
+    _SCULK_READ(stream.readOptional(mPixels, [](ReadOnlyBinaryStream& stream, auto& values) {
+        return stream.readArray(values, &ReadOnlyBinaryStream::readUnsignedInt);
+    }));
     return {};
 }
 
@@ -73,7 +71,6 @@ Result<> ClientboundMapItemDataPacket::read(ReadOnlyBinaryStream& stream) {
 std::string ClientboundMapItemDataPacket::toString() const {
     return SCULK_FORMAT_PACKET(
         SCULK_FORMAT_FIELD(mMapId),
-        SCULK_FORMAT_FIELD(mTypeFlag),
         SCULK_FORMAT_FIELD(mDimension),
         SCULK_FORMAT_FIELD(mIsLockedMap),
         SCULK_FORMAT_FIELD(mMapOrigin),

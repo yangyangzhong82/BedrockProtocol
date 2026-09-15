@@ -50,6 +50,16 @@ Result<> ServerboundDiagnosticsPacket::SystemDiagnosticTimingInfo::read(ReadOnly
     return stream.readByte(mPercentOfTotal);
 }
 
+void ServerboundDiagnosticsPacket::SystemCategory::write(BinaryStream& stream) const {
+    stream.writeString(mCategoryName);
+    stream.writeUnsignedInt64(mSystemIndex);
+}
+
+Result<> ServerboundDiagnosticsPacket::SystemCategory::read(ReadOnlyBinaryStream& stream) {
+    _SCULK_READ(stream.readString(mCategoryName));
+    return stream.readUnsignedInt64(mSystemIndex);
+}
+
 void ServerboundDiagnosticsPacket::ScopeDataSummary::write(BinaryStream& stream) const {
     stream.writeString(mLabel);
     stream.writeString(mIndentation);
@@ -84,6 +94,7 @@ void ServerboundDiagnosticsPacket::write(BinaryStream& stream) const {
     stream.writeArray(mMemoryCategoryValues, &MemoryCategoryCounter::write);
     stream.writeArray(mEntityDiagnostics, &EntityDiagnosticTimingInfo::write);
     stream.writeArray(mSystemDiagnostics, &SystemDiagnosticTimingInfo::write);
+    stream.writeArray(mSystemCategories, &SystemCategory::write);
     stream.writeArray(mScopeDataSummaries, &ScopeDataSummary::write);
 }
 
@@ -100,6 +111,7 @@ Result<> ServerboundDiagnosticsPacket::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readArray(mMemoryCategoryValues, &MemoryCategoryCounter::read));
     _SCULK_READ(stream.readArray(mEntityDiagnostics, &EntityDiagnosticTimingInfo::read));
     _SCULK_READ(stream.readArray(mSystemDiagnostics, &SystemDiagnosticTimingInfo::read));
+    _SCULK_READ(stream.readArray(mSystemCategories, &SystemCategory::read));
     return stream.readArray(mScopeDataSummaries, &ScopeDataSummary::read);
 }
 
@@ -118,6 +130,7 @@ std::string ServerboundDiagnosticsPacket::toString() const {
         SCULK_FORMAT_FIELD(mMemoryCategoryValues),
         SCULK_FORMAT_FIELD(mEntityDiagnostics),
         SCULK_FORMAT_FIELD(mSystemDiagnostics),
+        SCULK_FORMAT_FIELD(mSystemCategories),
         SCULK_FORMAT_FIELD(mScopeDataSummaries)
     );
 }

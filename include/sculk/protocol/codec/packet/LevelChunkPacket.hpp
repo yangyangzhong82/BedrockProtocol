@@ -13,14 +13,15 @@ namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
 class LevelChunkPacket : public IPacket {
 public:
-    ChunkPos                                  mPosition{};
-    std::int32_t                              mDimensionId{};
-    bool                                      mIsChunkInTickRange{};
-    std::string                               mSerializedChunk{};
-    std::uint32_t                             mSubChunksCount{};
-    bool                                      mClientNeedsToRequestSubchunks{};
-    std::int16_t                              mClientRequestSubChunkLimit{};
-    std::optional<std::vector<std::uint64_t>> mCacheBlobs{};
+    ChunkPos                   mPosition{};
+    std::int32_t               mDimensionId{};
+    bool                       mIsChunkInTickRange{};
+    std::string                mSerializedChunk{};
+    std::uint32_t              mSubChunksCount{};
+    bool                       mClientNeedsToRequestSubchunks{};
+    bool                       mCacheEnabled{};
+    std::int32_t               mClientRequestSubChunkLimit{};
+    std::vector<std::uint64_t> mCacheBlobs{};
 
 public:
     [[nodiscard]] MinecraftPacketIds getId() const noexcept override;
