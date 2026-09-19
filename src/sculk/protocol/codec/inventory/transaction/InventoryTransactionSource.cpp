@@ -6,20 +6,19 @@
 // SPDX-License-Identifier: MPL-2.0
 
 #include "sculk/protocol/codec/inventory/transaction/InventoryTransactionSource.hpp"
-#include "sculk/protocol/codec/utility/Cereal.hpp"
 
 namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
 void InventoryTransactionSource::write(BinaryStream& stream) const {
     stream.writeEnum(mType, &BinaryStream::writeUnsignedVarInt);
-    writeDoubleOptional(stream, mContainerId, &BinaryStream::writeByte);
-    writeDoubleOptional(stream, mBitFlags, &BinaryStream::writeUnsignedVarInt);
+    stream.writeOptional(mContainerId, &BinaryStream::writeByte);
+    stream.writeOptional(mBitFlags, &BinaryStream::writeUnsignedVarInt);
 }
 
 Result<> InventoryTransactionSource::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readEnum(mType, &ReadOnlyBinaryStream::readUnsignedVarInt));
-    _SCULK_READ(readDoubleOptional(stream, mContainerId, &ReadOnlyBinaryStream::readByte));
-    return readDoubleOptional(stream, mBitFlags, &ReadOnlyBinaryStream::readUnsignedVarInt);
+    _SCULK_READ(stream.readOptional(mContainerId, &ReadOnlyBinaryStream::readByte));
+    return stream.readOptional(mBitFlags, &ReadOnlyBinaryStream::readUnsignedVarInt);
 }
 
 void InventoryTransactionSource::writeLegacy(BinaryStream& stream) const {

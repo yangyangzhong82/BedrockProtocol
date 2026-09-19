@@ -43,6 +43,7 @@ struct TextDataPayload {
     std::string        mText{};
     bool               mUseRotation{};
     std::optional<int> mBackgroundColor{};
+    float              mLineGapHeight{};
     bool               mDepthTest{};
     bool               mShowBackface{};
     bool               mShowTextBackface{};

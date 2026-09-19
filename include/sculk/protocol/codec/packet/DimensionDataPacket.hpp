@@ -26,11 +26,12 @@ public:
         };
 
         std::string   mName{};
-        std::int32_t  mHeightMax{};
-        std::int32_t  mHeightMin{};
+        std::int32_t  mMinY{};
+        std::int32_t  mHeightRange{};
         GeneratorType mGeneratorType{};
         std::int32_t  mDimensionType{};
         UUID          mPackId{};
+        std::string   mDefaultBiome{};
 
         void write(BinaryStream& stream) const;
 

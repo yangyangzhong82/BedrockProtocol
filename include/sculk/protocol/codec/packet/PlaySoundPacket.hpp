@@ -19,7 +19,9 @@ public:
     float                        mVolume{};
     float                        mPitch{};
     std::int32_t                 mLoopCount{-1};
+    bool                         mBypassListenerRangeCheck{};
     std::optional<std::uint64_t> mServerSoundHandle{};
+    std::optional<float>         mPlaybackPositionSeconds{};
 
 public:
     [[nodiscard]] MinecraftPacketIds getId() const noexcept override;

@@ -22,13 +22,14 @@ public:
         void                   write(BinaryStream& stream) const;
         [[nodiscard]] Result<> read(ReadOnlyBinaryStream& stream);
     };
-    std::optional<SoundUpdate> mStop{};
-    std::optional<SoundUpdate> mSetVolume{};
-    std::optional<SoundUpdate> mSetPitch{};
-    std::optional<SoundUpdate> mFade{};
-    std::optional<SoundUpdate> mSeekTo{};
-    std::optional<SoundUpdate> mPause{};
-    std::optional<SoundUpdate> mResume{};
+    // All seven union slots are required on the wire; their names do not restrict the variant tag.
+    SoundUpdate mStop{};
+    SoundUpdate mSetVolume{};
+    SoundUpdate mSetPitch{};
+    SoundUpdate mFade{};
+    SoundUpdate mSeekTo{};
+    SoundUpdate mPause{};
+    SoundUpdate mResume{};
 
 public:
     [[nodiscard]] MinecraftPacketIds getId() const noexcept override;

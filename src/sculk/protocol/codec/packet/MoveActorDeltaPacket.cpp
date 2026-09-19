@@ -57,6 +57,7 @@ void MoveActorDeltaPacket::write(BinaryStream& stream) const {
     stream.writeBool((mHeader & (1u << 7)) != 0);
     stream.writeBool((mHeader & (1u << 8)) != 0);
     stream.writeBool((mHeader & (1u << 9)) != 0);
+    stream.writeUnsignedVarInt64(mTicks);
 }
 
 Result<> MoveActorDeltaPacket::read(ReadOnlyBinaryStream& stream) {
@@ -115,7 +116,7 @@ Result<> MoveActorDeltaPacket::read(ReadOnlyBinaryStream& stream) {
     if (present) {
         mHeader |= (1u << 9);
     }
-    return {};
+    return stream.readUnsignedVarInt64(mTicks);
 }
 
 #ifdef SCULK_PROTOCOL_ENABLE_FORMATTING
@@ -123,6 +124,7 @@ std::string MoveActorDeltaPacket::toString() const {
     return SCULK_FORMAT_PACKET(
         SCULK_FORMAT_FIELD(mActorRuntimeId),
         SCULK_FORMAT_FIELD(mHeader),
+        SCULK_FORMAT_FIELD(mTicks),
         SCULK_FORMAT_FIELD(mNewPosX),
         SCULK_FORMAT_FIELD(mNewPosY),
         SCULK_FORMAT_FIELD(mNewPosZ),

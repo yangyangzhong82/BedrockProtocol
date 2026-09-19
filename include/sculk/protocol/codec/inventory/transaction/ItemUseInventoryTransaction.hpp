@@ -40,6 +40,11 @@ public:
         SimulationTick = 2,
     };
 
+    enum class HandSlot : std::uint8_t {
+        MainHand = 0,
+        OffHand  = 1,
+    };
+
 public:
     InventoryTransaction       mTransaction{};
     ActionType                 mActionType{};
@@ -48,6 +53,7 @@ public:
     std::uint32_t              mTargetBlockId{};
     std::uint8_t               mFace{};
     std::int32_t               mSlot{};
+    HandSlot                   mHand{};
     NetworkItemStackDescriptor mItem{};
     Vec3                       mFromPos{};
     Vec3                       mClickPos{};
@@ -74,3 +80,4 @@ SCULK_PROTOCOL_ENUM_RANGE(ItemUseInventoryTransaction::ActionType, 0, 3)
 SCULK_PROTOCOL_ENUM_RANGE(ItemUseInventoryTransaction::ClientCooldownState, 0, 1)
 SCULK_PROTOCOL_ENUM_RANGE(ItemUseInventoryTransaction::PredictedResult, 0, 1)
 SCULK_PROTOCOL_ENUM_RANGE(ItemUseInventoryTransaction::TriggerType, 0, 2)
+SCULK_PROTOCOL_ENUM_RANGE(ItemUseInventoryTransaction::HandSlot, 0, 1)

@@ -18,33 +18,30 @@ std::string_view BossEventPacket::getName() const noexcept { return "BossEventPa
 
 void BossEventPacket::write(BinaryStream& stream) const {
     stream.writeVarInt64(mTargetActorID);
-    stream.writeVarInt64(mPlayerID);
-    stream.writeEnum(mType, &BinaryStream::writeUnsignedVarInt);
+    stream.writeEnum(mType, &BinaryStream::writeByte);
     stream.writeString(mName);
     stream.writeString(mFilteredName);
     stream.writeFloat(mPercentage);
-    stream.writeUnsignedVarInt(mColor);
-    stream.writeUnsignedVarInt(mOverlay);
+    stream.writeByte(mColor);
+    stream.writeByte(mOverlay);
 }
 
 Result<> BossEventPacket::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readVarInt64(mTargetActorID));
-    _SCULK_READ(stream.readVarInt64(mPlayerID));
-    _SCULK_READ(stream.readEnum(mType, &ReadOnlyBinaryStream::readUnsignedVarInt));
+    _SCULK_READ(stream.readEnum(mType, &ReadOnlyBinaryStream::readByte));
     _SCULK_READ(stream.readString(mName));
     _SCULK_CHECK_MAX(mName.size(), 256)
     _SCULK_READ(stream.readString(mFilteredName));
     _SCULK_CHECK_MAX(mFilteredName.size(), 256)
     _SCULK_READ(stream.readFloat(mPercentage));
-    _SCULK_READ(stream.readUnsignedVarInt(mColor));
-    return stream.readUnsignedVarInt(mOverlay);
+    _SCULK_READ(stream.readByte(mColor));
+    return stream.readByte(mOverlay);
 }
 
 #ifdef SCULK_PROTOCOL_ENABLE_FORMATTING
 std::string BossEventPacket::toString() const {
     return SCULK_FORMAT_PACKET(
         SCULK_FORMAT_FIELD(mTargetActorID),
-        SCULK_FORMAT_FIELD(mPlayerID),
         SCULK_FORMAT_FIELD(mType),
         SCULK_FORMAT_FIELD(mName),
         SCULK_FORMAT_FIELD(mFilteredName),

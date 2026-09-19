@@ -150,6 +150,7 @@
 #include "sculk/protocol/codec/packet/PositionTrackingDBServerBroadcastPacket.hpp"
 #include "sculk/protocol/codec/packet/PrimitiveShapesPacket.hpp"
 #include "sculk/protocol/codec/packet/PurchaseReceiptPacket.hpp"
+#include "sculk/protocol/codec/packet/RecordStartedPacket.hpp"
 #include "sculk/protocol/codec/packet/RefreshEntitlementsPacket.hpp"
 #include "sculk/protocol/codec/packet/RemoveActorPacket.hpp"
 #include "sculk/protocol/codec/packet/RemoveObjectivePacket.hpp"
@@ -191,6 +192,7 @@
 #include "sculk/protocol/codec/packet/SetHudPacket.hpp"
 #include "sculk/protocol/codec/packet/SetLastHurtByPacket.hpp"
 #include "sculk/protocol/codec/packet/SetLocalPlayerAsInitializedPacket.hpp"
+#include "sculk/protocol/codec/packet/SetPlayerFurnaceOptionsPacket.hpp"
 #include "sculk/protocol/codec/packet/SetPlayerGameTypePacket.hpp"
 #include "sculk/protocol/codec/packet/SetPlayerInventoryOptionsPacket.hpp"
 #include "sculk/protocol/codec/packet/SetScorePacket.hpp"
@@ -607,6 +609,8 @@ Result<std::unique_ptr<IPacket>> MinecraftPackets::createPacket(MinecraftPacketI
     CREATE_PACKET(ClientboundUpdateSoundData)             // 348
     CREATE_PACKET(SendPartyDestinationCookie)             // 349
     CREATE_PACKET(PartyDestinationCookieResponse)         // 350
+    CREATE_PACKET(SetPlayerFurnaceOptions)                // 351
+    CREATE_PACKET(RecordStarted)                          // 352
     CREATE_PACKET_DEFAULT(packetId)
 }
 

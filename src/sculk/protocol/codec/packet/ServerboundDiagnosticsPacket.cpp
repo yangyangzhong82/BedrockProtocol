@@ -27,13 +27,17 @@ void ServerboundDiagnosticsPacket::EntityDiagnosticTimingInfo::write(BinaryStrea
     stream.writeString(mEntity);
     stream.writeUnsignedInt64(mTimeInNanoseconds);
     stream.writeByte(mPercentOfTotal);
+    stream.writeOptional(mPosition, &Vec3::write);
+    stream.writeOptional(mDimension, &BinaryStream::writeString);
 }
 
 Result<> ServerboundDiagnosticsPacket::EntityDiagnosticTimingInfo::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readString(mDisplayName));
     _SCULK_READ(stream.readString(mEntity));
     _SCULK_READ(stream.readUnsignedInt64(mTimeInNanoseconds));
-    return stream.readByte(mPercentOfTotal);
+    _SCULK_READ(stream.readByte(mPercentOfTotal));
+    _SCULK_READ(stream.readOptional(mPosition, &Vec3::read));
+    return stream.readOptional(mDimension, &ReadOnlyBinaryStream::readString);
 }
 
 void ServerboundDiagnosticsPacket::SystemDiagnosticTimingInfo::write(BinaryStream& stream) const {
@@ -94,7 +98,9 @@ void ServerboundDiagnosticsPacket::write(BinaryStream& stream) const {
     stream.writeArray(mMemoryCategoryValues, &MemoryCategoryCounter::write);
     stream.writeArray(mEntityDiagnostics, &EntityDiagnosticTimingInfo::write);
     stream.writeArray(mSystemDiagnostics, &SystemDiagnosticTimingInfo::write);
-    stream.writeArray(mSystemCategories, &SystemCategory::write);
+    stream.writeOptional(mSystemCategories, [](BinaryStream& stream, const auto& categories) {
+        stream.writeArray(categories, &SystemCategory::write);
+    });
     stream.writeArray(mScopeDataSummaries, &ScopeDataSummary::write);
 }
 
@@ -111,7 +117,9 @@ Result<> ServerboundDiagnosticsPacket::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readArray(mMemoryCategoryValues, &MemoryCategoryCounter::read));
     _SCULK_READ(stream.readArray(mEntityDiagnostics, &EntityDiagnosticTimingInfo::read));
     _SCULK_READ(stream.readArray(mSystemDiagnostics, &SystemDiagnosticTimingInfo::read));
-    _SCULK_READ(stream.readArray(mSystemCategories, &SystemCategory::read));
+    _SCULK_READ(stream.readOptional(mSystemCategories, [](ReadOnlyBinaryStream& stream, auto& categories) {
+        return stream.readArray(categories, &SystemCategory::read);
+    }));
     return stream.readArray(mScopeDataSummaries, &ScopeDataSummary::read);
 }
 

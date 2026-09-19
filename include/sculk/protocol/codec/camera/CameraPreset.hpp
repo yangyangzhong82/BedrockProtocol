@@ -45,6 +45,8 @@ public:
     std::optional<bool>                            mAlignTargetAndCameraForward{};
     std::optional<CameraPresetAimAssistDefinition> mAimAssist{};
     std::optional<ControlScheme>                   mControlScheme{};
+    bool                                           mApplyInheritedStartingRotation{};
+    std::optional<Vec2>                            mStartingRot{};
 
     void write(BinaryStream& stream) const;
 

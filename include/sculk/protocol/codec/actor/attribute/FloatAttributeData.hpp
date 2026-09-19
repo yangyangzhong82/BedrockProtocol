@@ -26,8 +26,8 @@ enum class FloatAttributeOperation : std::uint8_t {
 struct FloatAttributeData {
     float                   mValue{};
     FloatAttributeOperation mOperation{};
-    float                   mConstraintMin{};
-    float                   mConstraintMax{};
+    std::optional<float>    mConstraintMin{};
+    std::optional<float>    mConstraintMax{};
 
     void write(BinaryStream& stream) const;
 

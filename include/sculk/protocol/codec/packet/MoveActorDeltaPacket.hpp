@@ -14,6 +14,7 @@ class MoveActorDeltaPacket : public IPacket {
 public:
     std::uint64_t mActorRuntimeId{};
     std::uint16_t mHeader{};
+    std::uint64_t mTicks{}; // Number of ticks over which to interpolate this movement.
     float         mNewPosX{};
     float         mNewPosY{};
     float         mNewPosZ{};

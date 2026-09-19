@@ -22,7 +22,9 @@ void PlaySoundPacket::write(BinaryStream& stream) const {
     stream.writeFloat(mVolume);
     stream.writeFloat(mPitch);
     stream.writeVarInt(mLoopCount);
+    stream.writeBool(mBypassListenerRangeCheck);
     stream.writeOptional(mServerSoundHandle, &BinaryStream::writeUnsignedInt64);
+    stream.writeOptional(mPlaybackPositionSeconds, &BinaryStream::writeFloat);
 }
 
 Result<> PlaySoundPacket::read(ReadOnlyBinaryStream& stream) {
@@ -31,7 +33,9 @@ Result<> PlaySoundPacket::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readFloat(mVolume));
     _SCULK_READ(stream.readFloat(mPitch));
     _SCULK_READ(stream.readVarInt(mLoopCount));
-    return stream.readOptional(mServerSoundHandle, &ReadOnlyBinaryStream::readUnsignedInt64);
+    _SCULK_READ(stream.readBool(mBypassListenerRangeCheck));
+    _SCULK_READ(stream.readOptional(mServerSoundHandle, &ReadOnlyBinaryStream::readUnsignedInt64));
+    return stream.readOptional(mPlaybackPositionSeconds, &ReadOnlyBinaryStream::readFloat);
 }
 
 #ifdef SCULK_PROTOCOL_ENABLE_FORMATTING
@@ -42,7 +46,9 @@ std::string PlaySoundPacket::toString() const {
         SCULK_FORMAT_FIELD(mVolume),
         SCULK_FORMAT_FIELD(mPitch),
         SCULK_FORMAT_FIELD(mLoopCount),
-        SCULK_FORMAT_FIELD(mServerSoundHandle)
+        SCULK_FORMAT_FIELD(mBypassListenerRangeCheck),
+        SCULK_FORMAT_FIELD(mServerSoundHandle),
+        SCULK_FORMAT_FIELD(mPlaybackPositionSeconds)
     );
 }
 #endif

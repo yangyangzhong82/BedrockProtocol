@@ -161,8 +161,10 @@ enum class DisconnectFailReason : std::uint8_t {
     HostAcceptsNoTypeOfAuth                       = 145,
     NotAuthenticatedFastFail                      = 146,
     EditorNotAllowed                              = 147,
+    MissingStructureData                          = 148,
+    UnsupportedTransport                          = 149,
 };
 
 } // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE
 
-SCULK_PROTOCOL_ENUM_RANGE(DisconnectFailReason, 0, 147)
+SCULK_PROTOCOL_ENUM_RANGE(DisconnectFailReason, 0, 149)

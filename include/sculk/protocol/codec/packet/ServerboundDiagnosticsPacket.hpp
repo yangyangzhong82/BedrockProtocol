@@ -6,6 +6,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 #pragma once
+#include "sculk/protocol/codec/math/Vec3.hpp"
 #include "sculk/protocol/codec/packet/IPacket.hpp"
 #include "sculk/protocol/utility/Enum.hpp"
 #include <vector>
@@ -74,59 +75,58 @@ public:
         OreUI_Client                            = 55,
         Persona_Pieces                          = 56,
         Persona_Animations                      = 57,
-        Persona_Textures                        = 58,
-        Persona_Characters                      = 59,
-        Persona_SkinPacks                       = 60,
-        Persona_Repo                            = 61,
-        Player                                  = 62,
-        RenderChunk                             = 63,
-        RenderChunk_IndexBuffer                 = 64,
-        RenderChunk_VertexBuffer                = 65,
-        Rendering                               = 66,
-        Rendering_BgfxInit                      = 67,
-        Rendering_BgfxStartFrame                = 68,
-        Rendering_BlockTessellator              = 69,
-        Rendering_EndFrame                      = 70,
-        Rendering_GraphicsTasksInit             = 71,
-        Rendering_Library                       = 72,
-        Rendering_PolygonOperatorPool           = 73,
-        Rendering_PBRTextureData                = 74,
-        Rendering_RenderRegistry                = 75,
-        Rendering_Setup                         = 76,
-        Rendering_Vertices                      = 77,
-        RequestLog                              = 78,
-        ResourcePacks                           = 79,
-        Sound                                   = 80,
-        SubChunk_BiomeData                      = 81,
-        SubChunk_BlockData                      = 82,
-        SubChunk_LightData                      = 83,
-        Textures                                = 84,
-        WeatherRenderer                         = 85,
-        World_Generator                         = 86,
-        Tasks                                   = 87,
-        Test                                    = 88,
-        Test_LoadTestTags                       = 89,
-        Scripting                               = 90,
-        Scripting_Runtime                       = 91,
-        Scripting_Context                       = 92,
-        Scripting_Context_Bindings_MC           = 93,
-        Scripting_Context_Bindings_GT           = 94,
-        Scripting_Context_Run                   = 95,
-        DataDrivenUI                            = 96,
-        DataDrivenUI_Defs                       = 97,
-        Gameface                                = 98,
-        Gameface_System                         = 99,
-        Gameface_DOM                            = 100,
-        Gameface_CSS                            = 101,
-        Gameface_Display                        = 102,
-        Gameface_TempAllocator                  = 103,
-        Gameface_PoolAllocator                  = 104,
-        Gameface_Dump                           = 105,
-        Gameface_Media                          = 106,
-        Gameface_JSON                           = 107,
-        Gameface_ScriptEngine                   = 108,
-        Gameface_Script                         = 109,
-        Gameface_Layout                         = 110,
+        Persona_Characters                      = 58,
+        Persona_SkinPacks                       = 59,
+        Persona_Repo                            = 60,
+        Player                                  = 61,
+        RenderChunk                             = 62,
+        RenderChunk_IndexBuffer                 = 63,
+        RenderChunk_VertexBuffer                = 64,
+        Rendering                               = 65,
+        Rendering_BgfxInit                      = 66,
+        Rendering_BgfxStartFrame                = 67,
+        Rendering_BlockTessellator              = 68,
+        Rendering_EndFrame                      = 69,
+        Rendering_GraphicsTasksInit             = 70,
+        Rendering_Library                       = 71,
+        Rendering_PolygonOperatorPool           = 72,
+        Rendering_PBRTextureData                = 73,
+        Rendering_RenderRegistry                = 74,
+        Rendering_Setup                         = 75,
+        Rendering_Vertices                      = 76,
+        RequestLog                              = 77,
+        ResourcePacks                           = 78,
+        Sound                                   = 79,
+        SubChunk_BiomeData                      = 80,
+        SubChunk_BlockData                      = 81,
+        SubChunk_LightData                      = 82,
+        Textures                                = 83,
+        WeatherRenderer                         = 84,
+        World_Generator                         = 85,
+        Tasks                                   = 86,
+        Test                                    = 87,
+        Test_LoadTestTags                       = 88,
+        Scripting                               = 89,
+        Scripting_Runtime                       = 90,
+        Scripting_Context                       = 91,
+        Scripting_Context_Bindings_MC           = 92,
+        Scripting_Context_Bindings_GT           = 93,
+        Scripting_Context_Run                   = 94,
+        DataDrivenUI                            = 95,
+        DataDrivenUI_Defs                       = 96,
+        Gameface                                = 97,
+        Gameface_System                         = 98,
+        Gameface_DOM                            = 99,
+        Gameface_CSS                            = 100,
+        Gameface_Display                        = 101,
+        Gameface_TempAllocator                  = 102,
+        Gameface_PoolAllocator                  = 103,
+        Gameface_Dump                           = 104,
+        Gameface_Media                          = 105,
+        Gameface_JSON                           = 106,
+        Gameface_ScriptEngine                   = 107,
+        Gameface_Script                         = 108,
+        Gameface_Layout                         = 109,
     };
 
     struct MemoryCategoryCounter {
@@ -139,10 +139,12 @@ public:
     };
 
     struct EntityDiagnosticTimingInfo {
-        std::string   mDisplayName{};
-        std::string   mEntity{};
-        std::uint64_t mTimeInNanoseconds{};
-        std::uint8_t  mPercentOfTotal{};
+        std::string                mDisplayName{};
+        std::string                mEntity{};
+        std::optional<Vec3>        mPosition{};
+        std::optional<std::string> mDimension{};
+        std::uint64_t              mTimeInNanoseconds{};
+        std::uint8_t               mPercentOfTotal{};
 
         void write(BinaryStream& stream) const;
 
@@ -180,20 +182,20 @@ public:
     };
 
 public:
-    float                                   mAvgFps{};
-    float                                   mAvgServerSimTickTimeMS{};
-    float                                   mAvgClientSimTickTimeMS{};
-    float                                   mAvgBeginFrameTimeMS{};
-    float                                   mAvgInputTimeMS{};
-    float                                   mAvgRenderTimeMS{};
-    float                                   mAvgEndFrameTimeMS{};
-    float                                   mAvgRemainderTimePercent{};
-    float                                   mAvgUnaccountedTimePercent{};
-    std::vector<MemoryCategoryCounter>      mMemoryCategoryValues{};
-    std::vector<EntityDiagnosticTimingInfo> mEntityDiagnostics{};
-    std::vector<SystemDiagnosticTimingInfo> mSystemDiagnostics{};
-    std::vector<SystemCategory>             mSystemCategories{};
-    std::vector<ScopeDataSummary>           mScopeDataSummaries{};
+    float                                      mAvgFps{};
+    float                                      mAvgServerSimTickTimeMS{};
+    float                                      mAvgClientSimTickTimeMS{};
+    float                                      mAvgBeginFrameTimeMS{};
+    float                                      mAvgInputTimeMS{};
+    float                                      mAvgRenderTimeMS{};
+    float                                      mAvgEndFrameTimeMS{};
+    float                                      mAvgRemainderTimePercent{};
+    float                                      mAvgUnaccountedTimePercent{};
+    std::vector<MemoryCategoryCounter>         mMemoryCategoryValues{};
+    std::vector<EntityDiagnosticTimingInfo>    mEntityDiagnostics{};
+    std::vector<SystemDiagnosticTimingInfo>    mSystemDiagnostics{};
+    std::optional<std::vector<SystemCategory>> mSystemCategories{};
+    std::vector<ScopeDataSummary>              mScopeDataSummaries{};
 
 public:
     [[nodiscard]] MinecraftPacketIds getId() const noexcept override;
@@ -209,6 +211,6 @@ public:
 
 } // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE
 
-SCULK_PROTOCOL_ENUM_RANGE(ServerboundDiagnosticsPacket::MemoryCategory, 0, 110)
+SCULK_PROTOCOL_ENUM_RANGE(ServerboundDiagnosticsPacket::MemoryCategory, 0, 109)
 
 SCULK_PROTOCOL_PACKET_FORMATTER(ServerboundDiagnosticsPacket)

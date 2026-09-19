@@ -22,7 +22,7 @@ public:
     Vec3                                                   mPosition{};
     Vec2                                                   mMoveVector{};
     float                                                  mPlayerHeadRotation{};
-    std::optional<std::bitset<66>>                         mInputData{};
+    std::bitset<66>                                        mInputData{};
     std::uint32_t                                          mInputType{};
     std::uint32_t                                          mPlayMode{};
     std::int32_t                                           mNewInteractionModel{};

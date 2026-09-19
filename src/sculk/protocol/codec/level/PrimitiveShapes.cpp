@@ -32,6 +32,7 @@ void PrimitiveShapes::write(BinaryStream& stream) const {
                 stream.writeString(text.mText);
                 stream.writeBool(text.mUseRotation);
                 stream.writeOptional(text.mBackgroundColor, &BinaryStream::writeSignedInt);
+                stream.writeFloat(text.mLineGapHeight);
                 stream.writeBool(text.mDepthTest);
                 stream.writeBool(text.mShowBackface);
                 stream.writeBool(text.mShowTextBackface);
@@ -90,6 +91,7 @@ Result<> PrimitiveShapes::read(ReadOnlyBinaryStream& stream) {
                 _SCULK_READ(stream.readString(text.mText));
                 _SCULK_READ(stream.readBool(text.mUseRotation));
                 _SCULK_READ(stream.readOptional(text.mBackgroundColor, &ReadOnlyBinaryStream::readSignedInt));
+                _SCULK_READ(stream.readFloat(text.mLineGapHeight));
                 _SCULK_READ(stream.readBool(text.mDepthTest));
                 _SCULK_READ(stream.readBool(text.mShowBackface));
                 return stream.readBool(text.mShowTextBackface);

@@ -20,6 +20,7 @@ void ItemUseInventoryTransaction::writeWithoutActions(BinaryStream& stream) cons
     mPos.write(stream);
     stream.writeByte(mFace);
     stream.writeVarInt(mSlot);
+    stream.writeEnum(mHand, &BinaryStream::writeByte);
     mItem.writeCereal(stream);
     mFromPos.write(stream);
     mClickPos.write(stream);
@@ -39,6 +40,7 @@ Result<> ItemUseInventoryTransaction::readWithoutActions(ReadOnlyBinaryStream& s
     _SCULK_READ(mPos.read(stream));
     _SCULK_READ(stream.readByte(mFace));
     _SCULK_READ(stream.readVarInt(mSlot));
+    _SCULK_READ(stream.readEnum(mHand, &ReadOnlyBinaryStream::readByte));
     _SCULK_READ(mItem.readCereal(stream));
     _SCULK_READ(mFromPos.read(stream));
     _SCULK_READ(mClickPos.read(stream));

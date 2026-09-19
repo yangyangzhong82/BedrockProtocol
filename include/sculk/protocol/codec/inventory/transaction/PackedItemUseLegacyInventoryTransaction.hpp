@@ -16,7 +16,6 @@ struct PackedItemUseLegacyInventoryTransaction {
     std::int32_t                                  mLegacyRequestRawId{};
     std::optional<std::vector<LegacySetItemSlot>> mLegacySetItemSlots{};
     ItemUseInventoryTransaction                   mItemUseTransaction{};
-    bool                                          mHasActions{true};
 
     void write(BinaryStream& stream) const;
 

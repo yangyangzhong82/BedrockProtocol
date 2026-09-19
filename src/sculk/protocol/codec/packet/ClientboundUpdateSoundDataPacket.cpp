@@ -48,24 +48,24 @@ Result<> ClientboundUpdateSoundDataPacket::SoundUpdate::read(ReadOnlyBinaryStrea
 
 void ClientboundUpdateSoundDataPacket::write(BinaryStream& stream) const {
     stream.writeUnsignedInt64(mHandle);
-    stream.writeOptional(mStop, &SoundUpdate::write);
-    stream.writeOptional(mSetVolume, &SoundUpdate::write);
-    stream.writeOptional(mSetPitch, &SoundUpdate::write);
-    stream.writeOptional(mFade, &SoundUpdate::write);
-    stream.writeOptional(mSeekTo, &SoundUpdate::write);
-    stream.writeOptional(mPause, &SoundUpdate::write);
-    stream.writeOptional(mResume, &SoundUpdate::write);
+    mStop.write(stream);
+    mSetVolume.write(stream);
+    mSetPitch.write(stream);
+    mFade.write(stream);
+    mSeekTo.write(stream);
+    mPause.write(stream);
+    mResume.write(stream);
 }
 
 Result<> ClientboundUpdateSoundDataPacket::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readUnsignedInt64(mHandle));
-    _SCULK_READ(stream.readOptional(mStop, &SoundUpdate::read));
-    _SCULK_READ(stream.readOptional(mSetVolume, &SoundUpdate::read));
-    _SCULK_READ(stream.readOptional(mSetPitch, &SoundUpdate::read));
-    _SCULK_READ(stream.readOptional(mFade, &SoundUpdate::read));
-    _SCULK_READ(stream.readOptional(mSeekTo, &SoundUpdate::read));
-    _SCULK_READ(stream.readOptional(mPause, &SoundUpdate::read));
-    _SCULK_READ(stream.readOptional(mResume, &SoundUpdate::read));
+    _SCULK_READ(mStop.read(stream));
+    _SCULK_READ(mSetVolume.read(stream));
+    _SCULK_READ(mSetPitch.read(stream));
+    _SCULK_READ(mFade.read(stream));
+    _SCULK_READ(mSeekTo.read(stream));
+    _SCULK_READ(mPause.read(stream));
+    _SCULK_READ(mResume.read(stream));
     return {};
 }
 

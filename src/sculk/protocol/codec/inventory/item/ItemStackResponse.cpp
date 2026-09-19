@@ -6,7 +6,6 @@
 // SPDX-License-Identifier: MPL-2.0
 
 #include "sculk/protocol/codec/inventory/item/ItemStackResponse.hpp"
-#include "sculk/protocol/codec/utility/Cereal.hpp"
 
 namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
@@ -14,7 +13,7 @@ void ItemStackResponseSlotInfo::write(BinaryStream& stream) const {
     stream.writeByte(mRequestedSlot);
     stream.writeByte(mSlot);
     stream.writeByte(mAmount);
-    writeDoubleOptional(stream, mNetId, &BinaryStream::writeVarInt);
+    stream.writeOptional(mNetId, &BinaryStream::writeVarInt);
     stream.writeString(mCustomName);
     stream.writeOptional(mFilteredCustomName, &BinaryStream::writeString);
     stream.writeVarInt(mDurationCorrection);
@@ -24,7 +23,7 @@ Result<> ItemStackResponseSlotInfo::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readByte(mRequestedSlot));
     _SCULK_READ(stream.readByte(mSlot));
     _SCULK_READ(stream.readByte(mAmount));
-    _SCULK_READ(readDoubleOptional(stream, mNetId, &ReadOnlyBinaryStream::readVarInt));
+    _SCULK_READ(stream.readOptional(mNetId, &ReadOnlyBinaryStream::readVarInt));
     _SCULK_READ(stream.readString(mCustomName));
     _SCULK_READ(stream.readOptional(mFilteredCustomName, &ReadOnlyBinaryStream::readString));
     _SCULK_READ(stream.readVarInt(mDurationCorrection));
@@ -47,7 +46,7 @@ Result<> ItemStackResponseContainerInfo::read(ReadOnlyBinaryStream& stream) {
 void ItemStackResponseInfo::write(BinaryStream& stream) const {
     stream.writeEnum(mResult, &BinaryStream::writeByte);
     stream.writeVarInt(mRequestId);
-    writeDoubleOptional(stream, mContainers, [](BinaryStream& stream, const auto& containers) {
+    stream.writeOptional(mContainers, [](BinaryStream& stream, const auto& containers) {
         stream.writeArray(containers, &ItemStackResponseContainerInfo::write);
     });
 }
@@ -55,7 +54,7 @@ void ItemStackResponseInfo::write(BinaryStream& stream) const {
 Result<> ItemStackResponseInfo::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readEnum(mResult, &ReadOnlyBinaryStream::readByte));
     _SCULK_READ(stream.readVarInt(mRequestId));
-    return readDoubleOptional(stream, mContainers, [](ReadOnlyBinaryStream& stream, auto& containers) {
+    return stream.readOptional(mContainers, [](ReadOnlyBinaryStream& stream, auto& containers) {
         return stream.readArray(containers, &ItemStackResponseContainerInfo::read);
     });
 }

@@ -243,6 +243,15 @@ if(PROTOCOL_ENABLE_DETAIL_ERRORS)
 endif()
 
 if(PROTOCOL_ENABLE_CODEC AND PROTOCOL_ENABLE_FORMATTING)
+    if(NOT TARGET Boost::pfr)
+        FetchContent_Declare(
+            boost_pfr
+            GIT_REPOSITORY https://github.com/boostorg/pfr.git
+            GIT_TAG 2.2.0
+        )
+        FetchContent_MakeAvailable(boost_pfr)
+    endif()
+    target_link_libraries(Protocol PRIVATE $<BUILD_INTERFACE:Boost::pfr>)
     target_compile_definitions(Protocol PUBLIC SCULK_PROTOCOL_ENABLE_FORMATTING)
 endif()
 
@@ -292,14 +301,14 @@ if(PROTOCOL_BUILD_TESTS)
         message(FATAL_ERROR "Protocol tests require PROTOCOL_ENABLE_CODEC=ON")
     endif()
     enable_testing()
-    add_executable(Protocol2168Tests tests/Protocol2168Tests.cpp)
-    target_link_libraries(Protocol2168Tests PRIVATE Protocol::Protocol)
+    add_executable(Protocol2193Tests tests/Protocol2193Tests.cpp)
+    target_link_libraries(Protocol2193Tests PRIVATE Protocol::Protocol)
     if(MSVC)
-        target_compile_options(Protocol2168Tests PRIVATE /utf-8 /GR-)
+        target_compile_options(Protocol2193Tests PRIVATE /utf-8 /GR-)
     else()
-        target_compile_options(Protocol2168Tests PRIVATE -fno-rtti)
+        target_compile_options(Protocol2193Tests PRIVATE -fno-rtti)
     endif()
-    add_test(NAME Protocol2168 COMMAND Protocol2168Tests "${PROJECT_SOURCE_DIR}/tests/reference/gophertunnel-2168.txt")
+    add_test(NAME Protocol2193 COMMAND Protocol2193Tests "${PROJECT_SOURCE_DIR}/tests/reference/gophertunnel-2193.txt")
 endif()
 
 install(TARGETS Protocol

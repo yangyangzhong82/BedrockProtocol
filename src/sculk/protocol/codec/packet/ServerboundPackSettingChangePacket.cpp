@@ -22,31 +22,44 @@ std::string_view ServerboundPackSettingChangePacket::getName() const noexcept {
 
 void ServerboundPackSettingChangePacket::write(BinaryStream& stream) const {
     mPackId.write(stream);
-    stream.writeByte(mPackSettingDataType);
     stream.writeString(mPackSettingName);
-    stream.writeBool(mBoolValue);
-    stream.writeFloat(mFloatValue);
-    stream.writeString(mStringValue);
+    stream.writeVariant(mPackSettingValue, [&stream](const auto& value) {
+        using T = std::decay_t<decltype(value)>;
+        if constexpr (std::is_same_v<T, float>) {
+            stream.writeFloat(value);
+        } else if constexpr (std::is_same_v<T, bool>) {
+            stream.writeBool(value);
+        } else if constexpr (std::is_same_v<T, std::string>) {
+            stream.writeString(value);
+        } else {
+            stream.writeArray(value, &BinaryStream::writeString);
+        }
+    });
 }
 
 Result<> ServerboundPackSettingChangePacket::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(mPackId.read(stream));
-    _SCULK_READ(stream.readByte(mPackSettingDataType));
     _SCULK_READ(stream.readString(mPackSettingName));
-    _SCULK_READ(stream.readBool(mBoolValue));
-    _SCULK_READ(stream.readFloat(mFloatValue));
-    return stream.readString(mStringValue);
+    return stream.readVariant(mPackSettingValue, [&stream](auto& value) -> Result<> {
+        using T = std::decay_t<decltype(value)>;
+        if constexpr (std::is_same_v<T, float>) {
+            return stream.readFloat(value);
+        } else if constexpr (std::is_same_v<T, bool>) {
+            return stream.readBool(value);
+        } else if constexpr (std::is_same_v<T, std::string>) {
+            return stream.readString(value);
+        } else {
+            return stream.readArray(value, &ReadOnlyBinaryStream::readString);
+        }
+    });
 }
 
 #ifdef SCULK_PROTOCOL_ENABLE_FORMATTING
 std::string ServerboundPackSettingChangePacket::toString() const {
     return SCULK_FORMAT_PACKET(
         SCULK_FORMAT_FIELD(mPackId),
-        SCULK_FORMAT_FIELD(mPackSettingDataType),
         SCULK_FORMAT_FIELD(mPackSettingName),
-        SCULK_FORMAT_FIELD(mBoolValue),
-        SCULK_FORMAT_FIELD(mFloatValue),
-        SCULK_FORMAT_FIELD(mStringValue)
+        SCULK_FORMAT_FIELD(mPackSettingValue)
     );
 }
 #endif

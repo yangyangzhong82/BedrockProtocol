@@ -14,20 +14,22 @@ namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
 void DimensionDataPacket::DimensionDefinition::write(BinaryStream& stream) const {
     stream.writeString(mName);
-    stream.writeVarInt(mHeightMax);
-    stream.writeVarInt(mHeightMin);
+    stream.writeVarInt(mMinY);
+    stream.writeVarInt(mHeightRange);
     stream.writeEnum(mGeneratorType, &BinaryStream::writeVarInt);
     stream.writeVarInt(mDimensionType);
     mPackId.write(stream);
+    stream.writeString(mDefaultBiome);
 }
 
 Result<> DimensionDataPacket::DimensionDefinition::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readString(mName));
-    _SCULK_READ(stream.readVarInt(mHeightMax));
-    _SCULK_READ(stream.readVarInt(mHeightMin));
+    _SCULK_READ(stream.readVarInt(mMinY));
+    _SCULK_READ(stream.readVarInt(mHeightRange));
     _SCULK_READ(stream.readEnum(mGeneratorType, &ReadOnlyBinaryStream::readVarInt));
     _SCULK_READ(stream.readVarInt(mDimensionType));
-    return mPackId.read(stream);
+    _SCULK_READ(mPackId.read(stream));
+    return stream.readString(mDefaultBiome);
 }
 
 MinecraftPacketIds DimensionDataPacket::getId() const noexcept { return MinecraftPacketIds::DimensionData; }

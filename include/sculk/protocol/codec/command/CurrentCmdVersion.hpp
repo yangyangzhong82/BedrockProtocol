@@ -68,10 +68,12 @@ enum class CurrentCmdVersion : std::int8_t {
     PlaySoundOutputFix                                                                = 48,
     PlayerWaypointsGamerule                                                           = 49,
     ClonePartialBedBlockFix                                                           = 50,
-    Latest                                                                            = ClonePartialBedBlockFix,
-    Count                                                                             = 51,
+    TeleportEntityDimensionPositionFix                                                = 51,
+    TimeOfCommandOverloads                                                            = 52,
+    Latest                                                                            = TimeOfCommandOverloads,
+    Count                                                                             = 53,
 };
 
 } // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE
 
-SCULK_PROTOCOL_ENUM_RANGE(CurrentCmdVersion, -1, 51)
+SCULK_PROTOCOL_ENUM_RANGE(CurrentCmdVersion, -1, 53)

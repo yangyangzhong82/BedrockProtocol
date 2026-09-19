@@ -8,17 +8,15 @@
 #pragma once
 #include "sculk/protocol/codec/actor/player/UUID.hpp"
 #include "sculk/protocol/codec/packet/IPacket.hpp"
+#include <variant>
 
 namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
 class ServerboundPackSettingChangePacket : public IPacket {
 public:
-    UUID         mPackId{};
-    std::uint8_t mPackSettingDataType{};
-    std::string  mPackSettingName{};
-    bool         mBoolValue{};
-    float        mFloatValue{};
-    std::string  mStringValue{};
+    UUID                                                             mPackId{};
+    std::string                                                      mPackSettingName{};
+    std::variant<float, bool, std::string, std::vector<std::string>> mPackSettingValue{};
 
 public:
     [[nodiscard]] MinecraftPacketIds getId() const noexcept override;

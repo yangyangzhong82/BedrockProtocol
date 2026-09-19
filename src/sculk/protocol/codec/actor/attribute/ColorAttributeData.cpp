@@ -11,12 +11,16 @@
 namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
 void ColorAttributeData::write(BinaryStream& stream) const {
-    stream.writeString(mValue);
+    for (auto channel : mValue) {
+        stream.writeSignedInt(channel);
+    }
     utils::writeEnumName(stream, mOperation);
 }
 
 Result<> ColorAttributeData::read(ReadOnlyBinaryStream& stream) {
-    _SCULK_READ(stream.readString(mValue));
+    for (auto& channel : mValue) {
+        _SCULK_READ(stream.readSignedInt(channel));
+    }
     return utils::readEnumName(stream, mOperation);
 }
 

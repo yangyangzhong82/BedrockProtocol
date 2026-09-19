@@ -13,6 +13,12 @@
 
 namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
+struct NoiseAlignment {
+    enum class Type : std::uint8_t { MinLocalTransitionEnd = 0 };
+    Type          mType{};
+    std::uint32_t mValue{};
+};
+
 struct EnvironmentAttributeData {
     std::string                  mAttributeName{};
     std::optional<AttributeData> mFromAttribute{};
@@ -23,6 +29,7 @@ struct EnvironmentAttributeData {
     EasingFunction               mEasing{};
     std::uint32_t                mLocalTransitionTicks{};
     bool                         mNoiseTransition{};
+    NoiseAlignment               mNoiseAlignment{};
 
     void write(BinaryStream& stream) const;
 

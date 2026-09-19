@@ -13,15 +13,15 @@ namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 void FloatAttributeData::write(BinaryStream& stream) const {
     stream.writeFloat(mValue);
     utils::writeEnumName(stream, mOperation);
-    stream.writeFloat(mConstraintMin);
-    stream.writeFloat(mConstraintMax);
+    stream.writeOptional(mConstraintMin, &BinaryStream::writeFloat);
+    stream.writeOptional(mConstraintMax, &BinaryStream::writeFloat);
 }
 
 Result<> FloatAttributeData::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readFloat(mValue));
     _SCULK_READ(utils::readEnumName(stream, mOperation));
-    _SCULK_READ(stream.readFloat(mConstraintMin));
-    return stream.readFloat(mConstraintMax);
+    _SCULK_READ(stream.readOptional(mConstraintMin, &ReadOnlyBinaryStream::readFloat));
+    return stream.readOptional(mConstraintMax, &ReadOnlyBinaryStream::readFloat);
 }
 
 } // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE

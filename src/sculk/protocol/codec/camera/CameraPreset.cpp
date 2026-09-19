@@ -36,6 +36,8 @@ void CameraPreset::write(BinaryStream& stream) const {
     stream.writeOptional(mControlScheme, [](BinaryStream& stream, ControlScheme value) {
         stream.writeEnum(value, &BinaryStream::writeByte);
     });
+    stream.writeBool(mApplyInheritedStartingRotation);
+    stream.writeOptional(mStartingRot, &Vec2::write);
 }
 
 Result<> CameraPreset::read(ReadOnlyBinaryStream& stream) {
@@ -62,9 +64,11 @@ Result<> CameraPreset::read(ReadOnlyBinaryStream& stream) {
     }));
     _SCULK_READ(stream.readOptional(mPlayerEffects, &ReadOnlyBinaryStream::readBool));
     _SCULK_READ(stream.readOptional(mAimAssist, &CameraPresetAimAssistDefinition::read));
-    return stream.readOptional(mControlScheme, [](ReadOnlyBinaryStream& stream, ControlScheme& value) {
+    _SCULK_READ(stream.readOptional(mControlScheme, [](ReadOnlyBinaryStream& stream, ControlScheme& value) {
         return stream.readEnum(value, &ReadOnlyBinaryStream::readByte);
-    });
+    }));
+    _SCULK_READ(stream.readBool(mApplyInheritedStartingRotation));
+    return stream.readOptional(mStartingRot, &Vec2::read);
 }
 
 } // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE

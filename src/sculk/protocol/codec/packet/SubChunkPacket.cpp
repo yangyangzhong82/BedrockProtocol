@@ -12,6 +12,29 @@
 
 namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
+namespace {
+using HeightMap = std::array<std::array<std::int8_t, 16>, 16>;
+
+void writeHeightMap(BinaryStream& stream, const HeightMap& data) {
+    for (const auto& row : data) {
+        stream.writeUnsignedVarInt(16);
+        stream.writeBytes(row.data(), row.size());
+    }
+}
+
+Result<> readHeightMap(ReadOnlyBinaryStream& stream, HeightMap& data) {
+    for (auto& row : data) {
+        std::uint32_t size{};
+        _SCULK_READ(stream.readUnsignedVarInt(size));
+        if (size != 16) {
+            return error_utils::makeError("Invalid height map row length");
+        }
+        _SCULK_READ(stream.readBytes(row.data(), row.size()));
+    }
+    return {};
+}
+} // namespace
+
 void SubChunkPacket::SubChunkPosOffset::write(BinaryStream& stream) const {
     stream.writeSignedChar(mX);
     stream.writeSignedChar(mY);
@@ -26,24 +49,16 @@ Result<> SubChunkPacket::SubChunkPosOffset::read(ReadOnlyBinaryStream& stream) {
 
 void SubChunkPacket::HeightmapData::write(BinaryStream& stream) const {
     stream.writeEnum(mHeightMapType, &BinaryStream::writeByte);
-    stream.writeOptional(mSubchunkHeightMap, [](BinaryStream& stream, const auto& data) {
-        stream.writeBytes(&data, sizeof(data));
-    });
+    stream.writeOptional(mSubchunkHeightMap, writeHeightMap);
     stream.writeEnum(mRenderHeightMapType, &BinaryStream::writeByte);
-    stream.writeOptional(mRenderHeightMap, [](BinaryStream& stream, const auto& data) {
-        stream.writeBytes(&data, sizeof(data));
-    });
+    stream.writeOptional(mRenderHeightMap, writeHeightMap);
 }
 
 Result<> SubChunkPacket::HeightmapData::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readEnum(mHeightMapType, &ReadOnlyBinaryStream::readByte));
-    _SCULK_READ(stream.readOptional(mSubchunkHeightMap, [](ReadOnlyBinaryStream& stream, auto& data) {
-        return stream.readBytes(&data, sizeof(data));
-    }));
+    _SCULK_READ(stream.readOptional(mSubchunkHeightMap, readHeightMap));
     _SCULK_READ(stream.readEnum(mRenderHeightMapType, &ReadOnlyBinaryStream::readByte));
-    return stream.readOptional(mRenderHeightMap, [](ReadOnlyBinaryStream& stream, auto& data) {
-        return stream.readBytes(&data, sizeof(data));
-    });
+    return stream.readOptional(mRenderHeightMap, readHeightMap);
 }
 
 void SubChunkPacket::SubChunkPacketData::write(BinaryStream& stream) const {

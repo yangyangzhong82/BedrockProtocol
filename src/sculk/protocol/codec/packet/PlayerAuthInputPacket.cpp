@@ -6,7 +6,6 @@
 // SPDX-License-Identifier: MPL-2.0
 
 #include "sculk/protocol/codec/packet/PlayerAuthInputPacket.hpp"
-#include "sculk/protocol/codec/utility/Cereal.hpp"
 #ifdef SCULK_PROTOCOL_ENABLE_FORMATTING
 #include "../utility/Format.hpp"
 #endif
@@ -22,25 +21,23 @@ void PlayerAuthInputPacket::write(BinaryStream& stream) const {
     mPosition.write(stream);
     mMoveVector.write(stream);
     stream.writeFloat(mPlayerHeadRotation);
-    stream.writeOptional(mInputData, [](BinaryStream& stream, const std::bitset<66>& flags) {
-        stream.writeUnsignedVarInt(static_cast<std::uint32_t>(flags.count()));
-        for (std::size_t i = 0; i < flags.size(); ++i) {
-            if (flags.test(i)) {
-                stream.writeVarInt(static_cast<std::int32_t>(i));
-            }
+    stream.writeUnsignedVarInt(static_cast<std::uint32_t>(mInputData.count()));
+    for (std::size_t i = 0; i < mInputData.size(); ++i) {
+        if (mInputData.test(i)) {
+            stream.writeVarInt(static_cast<std::int32_t>(i));
         }
-    });
+    }
     stream.writeUnsignedVarInt(mInputType);
     stream.writeUnsignedVarInt(mPlayMode);
     stream.writeVarInt(mNewInteractionModel);
     mInteractRotation.write(stream);
     stream.writeUnsignedVarInt64(mClientTick);
     mPosDelta.write(stream);
-    writeDoubleOptional(stream, mItemUseTransaction, &PackedItemUseLegacyInventoryTransaction::write);
-    writeDoubleOptional(stream, mItemStackRequestData, &ItemStackRequestData::write);
-    writeDoubleOptional(stream, mPlayerBlockActions, &PlayerBlockActions::write);
-    writeDoubleOptional(stream, mVehicleRotation, &Vec2::write);
-    writeDoubleOptional(stream, mClientPredictedVihicle, &BinaryStream::writeVarInt64);
+    stream.writeOptional(mItemUseTransaction, &PackedItemUseLegacyInventoryTransaction::write);
+    stream.writeOptional(mItemStackRequestData, &ItemStackRequestData::write);
+    stream.writeOptional(mPlayerBlockActions, &PlayerBlockActions::write);
+    stream.writeOptional(mVehicleRotation, &Vec2::write);
+    stream.writeOptional(mClientPredictedVihicle, &BinaryStream::writeVarInt64);
     mAnologMoveVector.write(stream);
     mCameraOrientation.write(stream);
     mRawMoveVector.write(stream);
@@ -51,34 +48,31 @@ Result<> PlayerAuthInputPacket::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(mPosition.read(stream));
     _SCULK_READ(mMoveVector.read(stream));
     _SCULK_READ(stream.readFloat(mPlayerHeadRotation));
-    _SCULK_READ(stream.readOptional(mInputData, [](ReadOnlyBinaryStream& stream, std::bitset<66>& flags) -> Result<> {
-        flags.reset();
-        std::uint32_t count{};
-        _SCULK_READ(stream.readUnsignedVarInt(count));
-        if (count > flags.size()) {
-            return error_utils::makeError("Too many player input flags");
+    mInputData.reset();
+    std::uint32_t count{};
+    _SCULK_READ(stream.readUnsignedVarInt(count));
+    if (count > mInputData.size()) {
+        return error_utils::makeError("Too many player input flags");
+    }
+    for (std::uint32_t i = 0; i < count; ++i) {
+        std::int32_t flag{};
+        _SCULK_READ(stream.readVarInt(flag));
+        if (flag < 0 || static_cast<std::size_t>(flag) >= mInputData.size() || mInputData.test(flag)) {
+            return error_utils::makeError("Invalid or duplicate player input flag");
         }
-        for (std::uint32_t i = 0; i < count; ++i) {
-            std::int32_t flag{};
-            _SCULK_READ(stream.readVarInt(flag));
-            if (flag < 0 || static_cast<std::size_t>(flag) >= flags.size() || flags.test(flag)) {
-                return error_utils::makeError("Invalid or duplicate player input flag");
-            }
-            flags.set(flag);
-        }
-        return {};
-    }));
+        mInputData.set(flag);
+    }
     _SCULK_READ(stream.readUnsignedVarInt(mInputType));
     _SCULK_READ(stream.readUnsignedVarInt(mPlayMode));
     _SCULK_READ(stream.readVarInt(mNewInteractionModel));
     _SCULK_READ(mInteractRotation.read(stream));
     _SCULK_READ(stream.readUnsignedVarInt64(mClientTick));
     _SCULK_READ(mPosDelta.read(stream));
-    _SCULK_READ(readDoubleOptional(stream, mItemUseTransaction, &PackedItemUseLegacyInventoryTransaction::read));
-    _SCULK_READ(readDoubleOptional(stream, mItemStackRequestData, &ItemStackRequestData::read));
-    _SCULK_READ(readDoubleOptional(stream, mPlayerBlockActions, &PlayerBlockActions::read));
-    _SCULK_READ(readDoubleOptional(stream, mVehicleRotation, &Vec2::read));
-    _SCULK_READ(readDoubleOptional(stream, mClientPredictedVihicle, &ReadOnlyBinaryStream::readVarInt64));
+    _SCULK_READ(stream.readOptional(mItemUseTransaction, &PackedItemUseLegacyInventoryTransaction::read));
+    _SCULK_READ(stream.readOptional(mItemStackRequestData, &ItemStackRequestData::read));
+    _SCULK_READ(stream.readOptional(mPlayerBlockActions, &PlayerBlockActions::read));
+    _SCULK_READ(stream.readOptional(mVehicleRotation, &Vec2::read));
+    _SCULK_READ(stream.readOptional(mClientPredictedVihicle, &ReadOnlyBinaryStream::readVarInt64));
     _SCULK_READ(mAnologMoveVector.read(stream));
     _SCULK_READ(mCameraOrientation.read(stream));
     return mRawMoveVector.read(stream);

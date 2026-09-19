@@ -128,6 +128,9 @@ end
 
 if enable_codec then
     add_requires("magic_enum v0.9.7")
+    if has_config("formatting") then
+        add_requires("sculk-boost-pfr")
+    end
 end
 
 if enable_auth or enable_conn then
@@ -169,6 +172,9 @@ target("Protocol")
     -- public packages (types leak into installed headers)
     if enable_codec then
         add_packages("magic_enum", {public = true})
+        if has_config("formatting") then
+            add_packages("sculk-boost-pfr")
+        end
     end
     if enable_auth or enable_conn then
         add_packages("parallel-hashmap", {public = true})

@@ -26,14 +26,13 @@ public:
     };
 
 public:
-    std::int64_t  mTargetActorID{};
-    std::int64_t  mPlayerID{};
-    EventType     mType{};
-    std::string   mName{};
-    std::string   mFilteredName{};
-    float         mPercentage{};
-    std::uint32_t mColor{};
-    std::uint32_t mOverlay{};
+    std::int64_t mTargetActorID{};
+    EventType    mType{};
+    std::string  mName{};
+    std::string  mFilteredName{};
+    float        mPercentage{};
+    std::uint8_t mColor{};
+    std::uint8_t mOverlay{};
 
 public:
     [[nodiscard]] MinecraftPacketIds getId() const noexcept override;

@@ -1,6 +1,6 @@
 # 📄 Protocol
 
-![Protocol Version](https://img.shields.io/badge/Bedrock-v2168%20%7C%2026.40-30ffee?style=flat-square)
+![Protocol Version](https://img.shields.io/badge/Bedrock-v2193%20%7C%2026.50-30ffee?style=flat-square)
 
 ![C++23](https://img.shields.io/badge/C%2B%2B-23-blue)
 ![CMake](https://img.shields.io/badge/CMake-3.20%2B-064f8c)
@@ -10,7 +10,7 @@
 
 A C++23 Minecraft Bedrock network protocol library.
 
-[Protocol 2168 migration notes and validation (Chinese)](PROTOCOL_2168.md)
+[Protocol 2193 migration notes and validation (Chinese)](PROTOCOL_2193.md)
 
 Protocol provides Bedrock packet models, packet ID mapping, and binary
 read/write utilities for building high-performance servers, proxies,
@@ -73,6 +73,7 @@ Some entries are optional and only enabled by the corresponding CMake features.
 | cpp-httplib | MIT | https://github.com/yhirose/cpp-httplib |
 | Reflection | MPL-2.0 | https://github.com/SculkCatalystMC/Reflection |
 | magic_enum | MIT | https://github.com/Neargye/magic_enum |
+| Boost.PFR (formatting) | Boost Software License 1.0 | https://github.com/boostorg/pfr |
 
 ## 🔌 CMake Integration
 
@@ -129,7 +130,7 @@ int main() {
 ## 🧬 ABI Namespace
 
 Public APIs are versioned with an inline ABI namespace,
-for example `sculk::protocol::abi_v2168`.
+for example `sculk::protocol::abi_v2193`.
 
 ## 🤝 Contributing
 
