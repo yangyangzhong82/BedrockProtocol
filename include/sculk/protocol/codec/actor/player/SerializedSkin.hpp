@@ -56,6 +56,8 @@ public:
         Capes         = 25,
         ClassicSkin   = 26,
         Emote         = 27,
+        CoCo = 28,
+        Unsupported = 29,
     };
 
     enum class ArmSizeType : std::uint8_t {
@@ -100,7 +102,6 @@ public:
 
 public:
     std::string                  mId{};
-    std::string                  mPlayFabId{};
     std::string                  mResourcePatch{};
     std::uint32_t                mSkinImageWidth{};
     std::uint32_t                mSkinImageHeight{};
@@ -137,4 +138,4 @@ public:
 SCULK_PROTOCOL_ENUM_RANGE(AnimatedTextureType, 0, 3)
 SCULK_PROTOCOL_ENUM_RANGE(AnimationExpression, 0, 1)
 SCULK_PROTOCOL_ENUM_RANGE(SerializedSkin::ArmSizeType, 0, 1)
-SCULK_PROTOCOL_ENUM_RANGE(SerializedSkin::PieceType, 1, 27)
+SCULK_PROTOCOL_ENUM_RANGE(SerializedSkin::PieceType, 1, 29)

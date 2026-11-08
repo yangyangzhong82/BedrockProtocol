@@ -11,7 +11,6 @@ namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
 void AttributeLayerData::write(BinaryStream& stream) const {
     stream.writeString(mName);
-    stream.writeOptional(mNoiseName, &BinaryStream::writeString);
     stream.writeVarInt(mDimension);
     mSettings.write(stream);
     stream.writeArray(mAttributes, &EnvironmentAttributeData::write);
@@ -19,7 +18,6 @@ void AttributeLayerData::write(BinaryStream& stream) const {
 
 Result<> AttributeLayerData::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readString(mName));
-    _SCULK_READ(stream.readOptional(mNoiseName, &ReadOnlyBinaryStream::readString));
     _SCULK_READ(stream.readVarInt(mDimension));
     _SCULK_READ(mSettings.read(stream));
     return stream.readArray(mAttributes, &EnvironmentAttributeData::read);

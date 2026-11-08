@@ -21,13 +21,15 @@ void AnimatePacket::write(BinaryStream& stream) const {
     stream.writeUnsignedVarInt64(mActorRuntimeId);
     stream.writeFloat(mData);
     stream.writeOptional(mSwingSource, &BinaryStream::writeString);
+    stream.writeEnum(mHand, &BinaryStream::writeByte);
 }
 
 Result<> AnimatePacket::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readEnum(mAction, &ReadOnlyBinaryStream::readByte));
     _SCULK_READ(stream.readUnsignedVarInt64(mActorRuntimeId));
     _SCULK_READ(stream.readFloat(mData));
-    return stream.readOptional(mSwingSource, &ReadOnlyBinaryStream::readString);
+    _SCULK_READ(stream.readOptional(mSwingSource, &ReadOnlyBinaryStream::readString));
+    return stream.readEnum(mHand, &ReadOnlyBinaryStream::readByte);
 }
 
 #ifdef SCULK_PROTOCOL_ENABLE_FORMATTING
@@ -37,7 +39,8 @@ std::string AnimatePacket::toString() const {
         SCULK_FORMAT_FIELD(mActorRuntimeId),
         SCULK_FORMAT_FIELD(mData),
         SCULK_FORMAT_FIELD(mRowingTime),
-        SCULK_FORMAT_FIELD(mSwingSource)
+        SCULK_FORMAT_FIELD(mSwingSource),
+        SCULK_FORMAT_FIELD(mHand)
     );
 }
 #endif

@@ -22,6 +22,7 @@ std::string_view ClientboundUpdateSoundDataPacket::getName() const noexcept {
 
 void ClientboundUpdateSoundDataPacket::SoundUpdate::write(BinaryStream& stream) const {
     stream.writeEnum(mType, &BinaryStream::writeUnsignedVarInt);
+    stream.writeEnum(mType, &BinaryStream::writeByte);
     if (mType >= Type::SetVolume && mType <= Type::SeekTo) {
         stream.writeFloat(mValue);
     }
@@ -32,7 +33,9 @@ void ClientboundUpdateSoundDataPacket::SoundUpdate::write(BinaryStream& stream) 
 
 Result<> ClientboundUpdateSoundDataPacket::SoundUpdate::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readEnum(mType, &ReadOnlyBinaryStream::readUnsignedVarInt));
-    if (mType > Type::Resume) {
+    Type eventType{};
+    _SCULK_READ(stream.readEnum(eventType, &ReadOnlyBinaryStream::readByte));
+    if (mType > Type::Resume || eventType != mType) {
         return error_utils::makeError("Invalid sound update variant");
     }
     mValue        = 0;
@@ -48,24 +51,12 @@ Result<> ClientboundUpdateSoundDataPacket::SoundUpdate::read(ReadOnlyBinaryStrea
 
 void ClientboundUpdateSoundDataPacket::write(BinaryStream& stream) const {
     stream.writeUnsignedInt64(mHandle);
-    mStop.write(stream);
-    mSetVolume.write(stream);
-    mSetPitch.write(stream);
-    mFade.write(stream);
-    mSeekTo.write(stream);
-    mPause.write(stream);
-    mResume.write(stream);
+    mEvent.write(stream);
 }
 
 Result<> ClientboundUpdateSoundDataPacket::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readUnsignedInt64(mHandle));
-    _SCULK_READ(mStop.read(stream));
-    _SCULK_READ(mSetVolume.read(stream));
-    _SCULK_READ(mSetPitch.read(stream));
-    _SCULK_READ(mFade.read(stream));
-    _SCULK_READ(mSeekTo.read(stream));
-    _SCULK_READ(mPause.read(stream));
-    _SCULK_READ(mResume.read(stream));
+    _SCULK_READ(mEvent.read(stream));
     return {};
 }
 
@@ -73,13 +64,7 @@ Result<> ClientboundUpdateSoundDataPacket::read(ReadOnlyBinaryStream& stream) {
 std::string ClientboundUpdateSoundDataPacket::toString() const {
     return SCULK_FORMAT_PACKET(
         SCULK_FORMAT_FIELD(mHandle),
-        SCULK_FORMAT_FIELD(mStop),
-        SCULK_FORMAT_FIELD(mSetVolume),
-        SCULK_FORMAT_FIELD(mSetPitch),
-        SCULK_FORMAT_FIELD(mFade),
-        SCULK_FORMAT_FIELD(mSeekTo),
-        SCULK_FORMAT_FIELD(mPause),
-        SCULK_FORMAT_FIELD(mResume)
+        SCULK_FORMAT_FIELD(mEvent)
     );
 }
 #endif

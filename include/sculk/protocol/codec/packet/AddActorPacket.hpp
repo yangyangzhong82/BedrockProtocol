@@ -6,6 +6,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 #pragma once
+#include "sculk/protocol/codec/actor/PassengerOfBlockArguments.hpp"
 #include "sculk/protocol/codec/actor/ActorEvent.hpp"
 #include "sculk/protocol/codec/actor/ActorLink.hpp"
 #include "sculk/protocol/codec/actor/MetaData.hpp"
@@ -19,6 +20,7 @@ namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
 class AddActorPacket : public IPacket {
 public:
+    std::optional<PassengerOfBlockArguments> mPassengerBlockData{};
     std::uint64_t                mActorRuntimeId{};
     std::int64_t                 mActorUniqueId{};
     std::string                  mIdentifier{};

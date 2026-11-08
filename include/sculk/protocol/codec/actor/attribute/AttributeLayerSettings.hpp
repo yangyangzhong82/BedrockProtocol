@@ -11,19 +11,11 @@
 
 namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
-struct AttributeLayerWeight {
-    std::variant<float, std::string> mWeight{};
-
-    void write(BinaryStream& stream) const;
-
-    [[nodiscard]] Result<> read(ReadOnlyBinaryStream& stream);
-};
-
 struct AttributeLayerSettings {
-    std::int32_t         mPriority{};
-    AttributeLayerWeight mWeight{};
-    bool                 mEnabled{};
-    bool                 mTransitionsPaused{};
+    std::int32_t mPriority{};
+    float        mWeight{};
+    bool         mEnabled{};
+    bool         mTransitionsPaused{};
 
     void write(BinaryStream& stream) const;
 

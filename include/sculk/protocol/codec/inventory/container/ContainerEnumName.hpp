@@ -80,8 +80,12 @@ enum class ContainerEnumName : uint8_t {
     RecipeFoodContainer                 = 64,
     RecipeBlocksContainer               = 65,
     RecipeFurnaceItemsContainer         = 66,
+    ReservedContainerA = 67,
+    ReservedContainerB = 68,
+    ReservedContainerC = 69,
+    ReservedContainerD = 70,
 };
 
 } // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE
 
-SCULK_PROTOCOL_ENUM_RANGE(ContainerEnumName, 0, 66)
+SCULK_PROTOCOL_ENUM_RANGE(ContainerEnumName, 0, 70)

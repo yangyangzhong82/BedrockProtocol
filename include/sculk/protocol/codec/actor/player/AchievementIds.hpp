@@ -95,8 +95,9 @@ enum class AchievementIds : std::uint8_t {
     MonsterHunter                   = 124,
     Diamonds                        = 125,
     PlethoraOfCats                  = 126,
+    WhatGoesAroundComesAround = 127,
 };
 
 } // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE
 
-SCULK_PROTOCOL_ENUM_RANGE(AchievementIds, 7, 126)
+SCULK_PROTOCOL_ENUM_RANGE(AchievementIds, 7, 127)

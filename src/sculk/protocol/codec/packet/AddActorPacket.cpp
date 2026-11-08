@@ -29,6 +29,7 @@ void AddActorPacket::write(BinaryStream& stream) const {
     mMetaData.write(stream);
     mSynchedProperties.write(stream);
     stream.writeArray(mActorLinks, &ActorLink::write);
+    stream.writeOptional(mPassengerBlockData, &PassengerOfBlockArguments::write);
 }
 
 Result<> AddActorPacket::read(ReadOnlyBinaryStream& stream) {
@@ -43,7 +44,8 @@ Result<> AddActorPacket::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readArray(mAttributes, &SyncedAttribute::read));
     _SCULK_READ(mMetaData.read(stream));
     _SCULK_READ(mSynchedProperties.read(stream));
-    return stream.readArray(mActorLinks, &ActorLink::read);
+    _SCULK_READ(stream.readArray(mActorLinks, &ActorLink::read));
+    return stream.readOptional(mPassengerBlockData, &PassengerOfBlockArguments::read);
 }
 
 #ifdef SCULK_PROTOCOL_ENABLE_FORMATTING
@@ -53,6 +55,7 @@ std::string AddActorPacket::toString() const {
         SCULK_FORMAT_FIELD(mActorUniqueId),
         SCULK_FORMAT_FIELD(mIdentifier),
         SCULK_FORMAT_FIELD(mActorLinks),
+        SCULK_FORMAT_FIELD(mPassengerBlockData),
         SCULK_FORMAT_FIELD(mPosition),
         SCULK_FORMAT_FIELD(mVelocity),
         SCULK_FORMAT_FIELD(mRotation),

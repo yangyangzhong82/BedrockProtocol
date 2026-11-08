@@ -18,6 +18,7 @@ struct PlayerListEntry {
     std::int64_t   mActorUniqueId{};
     std::string    mPlayerName{};
     std::string    mXuid{};
+    std::string    mPlayFabId{};
     std::string    mPlatformChatId{};
     std::int32_t   mBuildPlatform{};
     SerializedSkin mSerializedSkin{};

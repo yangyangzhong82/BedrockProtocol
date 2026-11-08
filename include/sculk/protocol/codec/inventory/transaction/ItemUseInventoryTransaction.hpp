@@ -6,6 +6,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 #pragma once
+#include "sculk/protocol/codec/inventory/HandSlot.hpp"
 #include "InventoryTransaction.hpp"
 #include "sculk/protocol/codec/inventory/item/NetworkItemStackDescriptor.hpp"
 #include "sculk/protocol/codec/level/block/BlockPos.hpp"
@@ -40,10 +41,7 @@ public:
         SimulationTick = 2,
     };
 
-    enum class HandSlot : std::uint8_t {
-        MainHand = 0,
-        OffHand  = 1,
-    };
+    using HandSlot = sculk::protocol::HandSlot;
 
 public:
     InventoryTransaction       mTransaction{};
@@ -80,4 +78,3 @@ SCULK_PROTOCOL_ENUM_RANGE(ItemUseInventoryTransaction::ActionType, 0, 3)
 SCULK_PROTOCOL_ENUM_RANGE(ItemUseInventoryTransaction::ClientCooldownState, 0, 1)
 SCULK_PROTOCOL_ENUM_RANGE(ItemUseInventoryTransaction::PredictedResult, 0, 1)
 SCULK_PROTOCOL_ENUM_RANGE(ItemUseInventoryTransaction::TriggerType, 0, 2)
-SCULK_PROTOCOL_ENUM_RANGE(ItemUseInventoryTransaction::HandSlot, 0, 1)

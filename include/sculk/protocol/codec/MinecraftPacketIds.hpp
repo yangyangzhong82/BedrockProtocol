@@ -269,9 +269,17 @@ enum class MinecraftPacketIds : std::uint16_t {
     PartyDestinationCookieResponse           = 350,
     SetPlayerFurnaceOptions                  = 351,
     RecordStarted                            = 352,
-    EndId                                    = 353,
+    ClientboundMatchmakingState              = 353,
+    ServerboundStonecutterSetRecipe          = 354,
+    ClientboundStonecutterSetRecipe          = 355,
+    ServerboundMatchmakingCancel             = 356,
+    SetPassengerOfBlock                      = 357,
+    ServerboundCursorItemDrag                = 358,
+    ClientboundPlayAudioContent              = 359,
+    ServerboundRegisterAudioContent          = 360,
+    EndId = 361,
 };
 
 } // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE
 
-SCULK_PROTOCOL_ENUM_RANGE(MinecraftPacketIds, 0, 353)
+SCULK_PROTOCOL_ENUM_RANGE(MinecraftPacketIds, 0, 361)

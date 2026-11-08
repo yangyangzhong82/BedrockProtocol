@@ -81,8 +81,9 @@ struct ItemStackRequestAction {
         CraftRecipeOptional             = 15,
         CraftGrindStone                 = 16,
         CraftLoom                       = 17,
-        CraftNonImplemented             = 18,
-        CraftResults                    = 19,
+        CraftReservedAction             = 18,
+        CraftNonImplemented             = 19,
+        CraftResults                    = 20,
     };
 
     struct TransferBase {
@@ -155,6 +156,11 @@ struct ItemStackRequestAction {
         std::uint8_t mTimesCrafted{};
     };
 
+    struct CraftDiscPress {
+        std::string mReservedId{};
+        std::uint8_t mTimesCrafted{};
+    };
+
     struct CraftResult {
         std::vector<ItemStackRequestItem> mCraftResults{};
         std::uint8_t                      mTimesCrafted{};
@@ -175,6 +181,7 @@ struct ItemStackRequestAction {
         CraftRecipeOptional,
         CraftGrindStone,
         CraftLoom,
+        CraftDiscPress,
         CraftResult,
         OnlyType>;
 
@@ -208,4 +215,4 @@ struct ItemStackRequest {
 } // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE
 
 SCULK_PROTOCOL_ENUM_RANGE(ItemStackRequestAction::MineBlock::PreValidationStatus, 0, 1)
-SCULK_PROTOCOL_ENUM_RANGE(ItemStackRequestAction::Type, 0, 19)
+SCULK_PROTOCOL_ENUM_RANGE(ItemStackRequestAction::Type, 0, 20)

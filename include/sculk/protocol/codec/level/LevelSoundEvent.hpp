@@ -582,9 +582,10 @@ enum class LevelSoundEvent : std::uint16_t {
     MOUNT                                        = 611,
     DISMOUNT                                     = 612,
     STRAW_BED_BREAK_LEAVE                        = 613,
-    UNDEFINED                                    = 614,
+    ICE_BALL_BREAK = 614,
+    UNDEFINED = 615,
 };
 
 } // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE
 
-SCULK_PROTOCOL_ENUM_RANGE(LevelSoundEvent, 0, 614)
+SCULK_PROTOCOL_ENUM_RANGE(LevelSoundEvent, 0, 615)

@@ -21,6 +21,7 @@ void LevelSettings::write(BinaryStream& stream) const {
     stream.writeVarInt(mEditorWorldType);
     stream.writeBool(mIsCreatedInEditor);
     stream.writeBool(mIsExportedFromEditor);
+    stream.writeEnum(mEditorLevelMigrationVersion, &BinaryStream::writeByte);
     stream.writeVarInt(mDayCycleStopTime);
     stream.writeUnsignedVarInt(mEduOffer);
     stream.writeBool(mIsEdu);
@@ -75,6 +76,7 @@ Result<> LevelSettings::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readVarInt(mEditorWorldType));
     _SCULK_READ(stream.readBool(mIsCreatedInEditor));
     _SCULK_READ(stream.readBool(mIsExportedFromEditor));
+    _SCULK_READ(stream.readEnum(mEditorLevelMigrationVersion, &ReadOnlyBinaryStream::readByte));
     _SCULK_READ(stream.readVarInt(mDayCycleStopTime));
     _SCULK_READ(stream.readUnsignedVarInt(mEduOffer));
     _SCULK_READ(stream.readBool(mIsEdu));

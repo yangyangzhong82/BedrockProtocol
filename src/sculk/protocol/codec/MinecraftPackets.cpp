@@ -151,6 +151,14 @@
 #include "sculk/protocol/codec/packet/PrimitiveShapesPacket.hpp"
 #include "sculk/protocol/codec/packet/PurchaseReceiptPacket.hpp"
 #include "sculk/protocol/codec/packet/RecordStartedPacket.hpp"
+#include "sculk/protocol/codec/packet/ClientboundMatchmakingStatePacket.hpp"
+#include "sculk/protocol/codec/packet/ServerboundStonecutterSetRecipePacket.hpp"
+#include "sculk/protocol/codec/packet/ClientboundStonecutterSetRecipePacket.hpp"
+#include "sculk/protocol/codec/packet/ServerboundMatchmakingCancelPacket.hpp"
+#include "sculk/protocol/codec/packet/SetPassengerOfBlockPacket.hpp"
+#include "sculk/protocol/codec/packet/ServerboundCursorItemDragPacket.hpp"
+#include "sculk/protocol/codec/packet/ClientboundPlayAudioContentPacket.hpp"
+#include "sculk/protocol/codec/packet/ServerboundRegisterAudioContentPacket.hpp"
 #include "sculk/protocol/codec/packet/RefreshEntitlementsPacket.hpp"
 #include "sculk/protocol/codec/packet/RemoveActorPacket.hpp"
 #include "sculk/protocol/codec/packet/RemoveObjectivePacket.hpp"
@@ -611,6 +619,14 @@ Result<std::unique_ptr<IPacket>> MinecraftPackets::createPacket(MinecraftPacketI
     CREATE_PACKET(PartyDestinationCookieResponse)         // 350
     CREATE_PACKET(SetPlayerFurnaceOptions)                // 351
     CREATE_PACKET(RecordStarted)                          // 352
+    CREATE_PACKET(ClientboundMatchmakingState) // 353
+    CREATE_PACKET(ServerboundStonecutterSetRecipe) // 354
+    CREATE_PACKET(ClientboundStonecutterSetRecipe) // 355
+    CREATE_PACKET(ServerboundMatchmakingCancel) // 356
+    CREATE_PACKET(SetPassengerOfBlock) // 357
+    CREATE_PACKET(ServerboundCursorItemDrag) // 358
+    CREATE_PACKET(ClientboundPlayAudioContent) // 359
+    CREATE_PACKET(ServerboundRegisterAudioContent) // 360
     CREATE_PACKET_DEFAULT(packetId)
 }
 

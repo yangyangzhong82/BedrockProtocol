@@ -146,6 +146,10 @@ void ItemStackRequestAction::write(BinaryStream& stream) const {
                 stream.writeString(data.mPatternNameId);
                 stream.writeByte(data.mTimesCrafted);
             },
+            [&](const CraftDiscPress& data) {
+                stream.writeString(data.mReservedId);
+                stream.writeByte(data.mTimesCrafted);
+            },
             [&](const CraftResult& data) {
                 stream.writeArray(data.mCraftResults, &ItemStackRequestItem::write);
                 stream.writeByte(data.mTimesCrafted);
@@ -161,7 +165,7 @@ Result<> ItemStackRequestAction::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readUnsignedVarInt(variant));
     _SCULK_READ(stream.readEnum(mActionType, &ReadOnlyBinaryStream::readByte));
     const auto type = static_cast<std::uint32_t>(mActionType);
-    if (type > 19 || type == 7 || type == 8 || variant != (type > 8 ? type - 2 : type)) {
+    if (type > 20 || type == 7 || type == 8 || variant != (type > 8 ? type - 2 : type)) {
         return error_utils::makeError("Invalid stack request action variant");
     }
     switch (mActionType) {
@@ -254,6 +258,13 @@ Result<> ItemStackRequestAction::read(ReadOnlyBinaryStream& stream) {
     case Type::CraftLoom: {
         CraftLoom data{};
         _SCULK_READ(stream.readString(data.mPatternNameId));
+        _SCULK_READ(stream.readByte(data.mTimesCrafted));
+        mVariant = std::move(data);
+        return {};
+    }
+    case Type::CraftReservedAction: {
+        CraftDiscPress data{};
+        _SCULK_READ(stream.readString(data.mReservedId));
         _SCULK_READ(stream.readByte(data.mTimesCrafted));
         mVariant = std::move(data);
         return {};

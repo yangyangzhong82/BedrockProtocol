@@ -14,6 +14,7 @@ void ItemUseOnActorInventoryTransaction::write(BinaryStream& stream) const {
     stream.writeUnsignedVarInt64(mRuntimeId);
     stream.writeEnum(mActionType, &BinaryStream::writeUnsignedVarInt);
     stream.writeVarInt(mSlot);
+    stream.writeEnum(mHand, &BinaryStream::writeByte);
     mItem.writeCereal(stream);
     mFromPos.write(stream);
     mHitPos.write(stream);
@@ -24,6 +25,7 @@ Result<> ItemUseOnActorInventoryTransaction::read(ReadOnlyBinaryStream& stream) 
     _SCULK_READ(stream.readUnsignedVarInt64(mRuntimeId));
     _SCULK_READ(stream.readEnum(mActionType, &ReadOnlyBinaryStream::readUnsignedVarInt));
     _SCULK_READ(stream.readVarInt(mSlot));
+    _SCULK_READ(stream.readEnum(mHand, &ReadOnlyBinaryStream::readByte));
     _SCULK_READ(mItem.readCereal(stream));
     _SCULK_READ(mFromPos.read(stream));
     return mHitPos.read(stream);

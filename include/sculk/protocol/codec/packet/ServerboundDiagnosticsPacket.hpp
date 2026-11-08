@@ -127,6 +127,7 @@ public:
         Gameface_ScriptEngine                   = 107,
         Gameface_Script                         = 108,
         Gameface_Layout                         = 109,
+        Executable = 110,
     };
 
     struct MemoryCategoryCounter {
@@ -211,6 +212,6 @@ public:
 
 } // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE
 
-SCULK_PROTOCOL_ENUM_RANGE(ServerboundDiagnosticsPacket::MemoryCategory, 0, 109)
+SCULK_PROTOCOL_ENUM_RANGE(ServerboundDiagnosticsPacket::MemoryCategory, 0, 110)
 
 SCULK_PROTOCOL_PACKET_FORMATTER(ServerboundDiagnosticsPacket)

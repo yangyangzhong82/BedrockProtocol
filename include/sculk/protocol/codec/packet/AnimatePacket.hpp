@@ -6,6 +6,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 #pragma once
+#include "sculk/protocol/codec/inventory/HandSlot.hpp"
 #include "sculk/protocol/codec/packet/IPacket.hpp"
 #include "sculk/protocol/utility/Enum.hpp"
 
@@ -23,6 +24,7 @@ public:
 
 public:
     Action                     mAction{};
+    HandSlot                   mHand{};
     std::uint64_t              mActorRuntimeId{};
     float                      mData{};
     float                      mRowingTime{};

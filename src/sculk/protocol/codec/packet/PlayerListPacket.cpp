@@ -17,6 +17,7 @@ void PlayerListEntry::write(BinaryStream& stream) const {
     stream.writeVarInt64(mActorUniqueId);
     stream.writeString(mPlayerName);
     stream.writeString(mXuid);
+    stream.writeString(mPlayFabId);
     stream.writeString(mPlatformChatId);
     stream.writeSignedInt(mBuildPlatform);
     mSerializedSkin.write(stream);
@@ -31,6 +32,7 @@ Result<> PlayerListEntry::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readVarInt64(mActorUniqueId));
     _SCULK_READ(stream.readString(mPlayerName));
     _SCULK_READ(stream.readString(mXuid));
+    _SCULK_READ(stream.readString(mPlayFabId));
     _SCULK_READ(stream.readString(mPlatformChatId));
     _SCULK_READ(stream.readSignedInt(mBuildPlatform));
     _SCULK_READ(mSerializedSkin.read(stream));

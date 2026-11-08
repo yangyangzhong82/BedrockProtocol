@@ -186,6 +186,8 @@ enum class ActorType : std::int32_t {
     CamelHusk                  = 152 | Animal | Undead,
     SulfurCube                 = 153 | PathfinderMob,
     Cushion                    = 154,
+    Frostbite = 199579,
+    IceBall = 4194460,
 };
 
 } // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE

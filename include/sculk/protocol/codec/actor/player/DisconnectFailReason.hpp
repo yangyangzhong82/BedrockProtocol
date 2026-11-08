@@ -163,8 +163,9 @@ enum class DisconnectFailReason : std::uint8_t {
     EditorNotAllowed                              = 147,
     MissingStructureData                          = 148,
     UnsupportedTransport                          = 149,
+    SubClientLoginNotBound = 150,
 };
 
 } // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE
 
-SCULK_PROTOCOL_ENUM_RANGE(DisconnectFailReason, 0, 149)
+SCULK_PROTOCOL_ENUM_RANGE(DisconnectFailReason, 0, 150)

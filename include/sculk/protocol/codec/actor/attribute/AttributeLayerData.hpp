@@ -15,7 +15,6 @@ namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE {
 
 struct AttributeLayerData {
     std::string                           mName{};
-    std::optional<std::string>            mNoiseName{};
     std::int32_t                          mDimension{};
     AttributeLayerSettings                mSettings{};
     std::vector<EnvironmentAttributeData> mAttributes{};

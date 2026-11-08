@@ -20,6 +20,8 @@ void DimensionDataPacket::DimensionDefinition::write(BinaryStream& stream) const
     stream.writeVarInt(mDimensionType);
     mPackId.write(stream);
     stream.writeString(mDefaultBiome);
+    stream.writeVarInt(mCloudHeight);
+    stream.writeBool(mRenderClouds);
 }
 
 Result<> DimensionDataPacket::DimensionDefinition::read(ReadOnlyBinaryStream& stream) {
@@ -29,7 +31,9 @@ Result<> DimensionDataPacket::DimensionDefinition::read(ReadOnlyBinaryStream& st
     _SCULK_READ(stream.readEnum(mGeneratorType, &ReadOnlyBinaryStream::readVarInt));
     _SCULK_READ(stream.readVarInt(mDimensionType));
     _SCULK_READ(mPackId.read(stream));
-    return stream.readString(mDefaultBiome);
+    _SCULK_READ(stream.readString(mDefaultBiome));
+    _SCULK_READ(stream.readVarInt(mCloudHeight));
+    return stream.readBool(mRenderClouds);
 }
 
 MinecraftPacketIds DimensionDataPacket::getId() const noexcept { return MinecraftPacketIds::DimensionData; }

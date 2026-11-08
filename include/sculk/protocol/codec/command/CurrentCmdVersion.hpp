@@ -70,10 +70,13 @@ enum class CurrentCmdVersion : std::int8_t {
     ClonePartialBedBlockFix                                                           = 50,
     TeleportEntityDimensionPositionFix                                                = 51,
     TimeOfCommandOverloads                                                            = 52,
-    Latest                                                                            = TimeOfCommandOverloads,
-    Count                                                                             = 53,
+    Unknown53 = 53,
+    Unknown54 = 54,
+    Unknown55 = 55,
+    Latest = Unknown55,
+    Count = 56,
 };
 
 } // namespace sculk::protocol::SCULK_ABI_INLINE_NAMESPACE
 
-SCULK_PROTOCOL_ENUM_RANGE(CurrentCmdVersion, -1, 53)
+SCULK_PROTOCOL_ENUM_RANGE(CurrentCmdVersion, -1, 56)

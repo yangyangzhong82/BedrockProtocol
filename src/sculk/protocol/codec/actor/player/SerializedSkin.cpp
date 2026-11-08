@@ -60,7 +60,6 @@ Result<> SerializedSkin::PieceTintColors::read(ReadOnlyBinaryStream& stream) {
 
 void SerializedSkin::write(BinaryStream& stream) const {
     stream.writeString(mId);
-    stream.writeString(mPlayFabId);
     stream.writeString(mResourcePatch);
     stream.writeUnsignedInt(mSkinImageWidth);
     stream.writeUnsignedInt(mSkinImageHeight);
@@ -89,7 +88,6 @@ void SerializedSkin::write(BinaryStream& stream) const {
 
 Result<> SerializedSkin::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(stream.readString(mId));
-    _SCULK_READ(stream.readString(mPlayFabId));
     _SCULK_READ(stream.readString(mResourcePatch));
     _SCULK_READ(stream.readUnsignedInt(mSkinImageWidth));
     _SCULK_READ(stream.readUnsignedInt(mSkinImageHeight));

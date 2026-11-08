@@ -6,6 +6,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 #pragma once
+#include "sculk/protocol/codec/inventory/HandSlot.hpp"
 #include "InventoryTransaction.hpp"
 #include "sculk/protocol/codec/inventory/item/NetworkItemStackDescriptor.hpp"
 #include "sculk/protocol/codec/math/Vec3.hpp"
@@ -23,6 +24,7 @@ public:
 public:
     InventoryTransaction       mTransaction{};
     ActionType                 mActionType{};
+    HandSlot                   mHand{};
     std::int32_t               mSlot{};
     NetworkItemStackDescriptor mItem{};
     Vec3                       mFromPos{};

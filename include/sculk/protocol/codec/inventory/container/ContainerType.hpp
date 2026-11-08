@@ -51,6 +51,7 @@ enum class ContainerType : std::uint8_t {
     DecoratedPot        = 35,
     Crafter             = 36,
     DataDrivenContainer = 37,
+    ReservedContainerType = 38,
     None                = 247,
     Inventory           = 255,
 };

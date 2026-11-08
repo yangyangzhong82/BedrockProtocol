@@ -7,6 +7,7 @@
 
 #pragma once
 #include "Difficulty.hpp"
+#include "EditorLevelMigrationVersion.hpp"
 #include "sculk/protocol/codec/actor/player/GameType.hpp"
 #include "sculk/protocol/codec/actor/player/PlayerPermissionLevel.hpp"
 #include "sculk/protocol/codec/level/Experiments.hpp"
@@ -28,6 +29,7 @@ struct LevelSettings {
     int                       mEditorWorldType{};
     bool                      mIsCreatedInEditor{};
     bool                      mIsExportedFromEditor{};
+    EditorLevelMigrationVersion mEditorLevelMigrationVersion{};
     int                       mDayCycleStopTime{};
     std::uint32_t             mEduOffer{};
     bool                      mIsEdu{};

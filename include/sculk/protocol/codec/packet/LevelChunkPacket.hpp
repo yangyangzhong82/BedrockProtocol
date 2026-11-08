@@ -20,6 +20,7 @@ public:
     std::uint32_t              mSubChunksCount{};
     bool                       mClientNeedsToRequestSubchunks{};
     bool                       mCacheEnabled{};
+    bool                       mIsClientBiomeUpdate{};
     std::int32_t               mClientRequestSubChunkLimit{};
     std::vector<std::uint64_t> mCacheBlobs{};
 

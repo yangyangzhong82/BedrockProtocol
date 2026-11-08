@@ -39,6 +39,7 @@ void require(bool condition, const std::string& message) {
 }
 
 std::vector<std::byte> unhex(std::string_view hex) {
+    if (hex == "-") return {};
     require(hex.size() % 2 == 0, "Odd hex length");
     std::vector<std::byte> bytes;
     for (std::size_t i = 0; i < hex.size(); i += 2) {
@@ -117,6 +118,10 @@ void checkCorpus(const char* path) {
         if (name == "start_game") {
             auto& game = static_cast<StartGamePacket&>(packet);
             require(game.mActorUniqueId == -123 && game.mActorRuntimeId == 456, "StartGame actor IDs");
+            require(
+                game.mLevelSettings.mEditorLevelMigrationVersion == EditorLevelMigrationVersion::EditorAchievements,
+                "Editor migration version"
+            );
             require(game.mLevelSettings.mEduOffer == 2, "StartGame unsigned education offer");
             require(game.mLevelSettings.mForceExperimentalGameplay == false, "StartGame optional false");
         }
@@ -127,6 +132,7 @@ void checkCorpus(const char* path) {
                     && players[1].mAction == PlayerListEntry::ActionType::Remove,
                 "PlayerList per-entry actions"
             );
+            require(players[0].mPlayFabId == "playfab-test", "Player list PlayFab identity");
             require(players[0].mSerializedSkin.mProfileHash == "hash", "Skin profile hash");
         }
         if (name == "input_flags") {
@@ -148,6 +154,7 @@ void checkCorpus(const char* path) {
                 dimensions.size() == 1 && dimensions[0].mMinY == -64 && dimensions[0].mHeightRange == 384,
                 "Dimension minimum and height range"
             );
+            require(dimensions[0].mCloudHeight == 192 && dimensions[0].mRenderClouds, "Dimension cloud settings");
             require(dimensions[0].mDefaultBiome == "minecraft:plains", "Dimension default biome");
         }
         if (name == "delta_full") {
@@ -162,42 +169,48 @@ void checkCorpus(const char* path) {
             require(record.mServerSoundHandle == 0x1122334455667788ULL, "Record sound handle");
         }
         // A fresh decoder must reject a truncated mandatory suffix.
-        auto                 truncated = MinecraftPackets::createPacket(static_cast<MinecraftPacketIds>(id));
-        ReadOnlyBinaryStream shortReader(std::span<const std::byte>(bytes).first(bytes.size() - 1));
-        require(!(*truncated)->read(shortReader), name + ": accepted truncated payload");
+        if (!bytes.empty()) {
+            auto                 truncated = MinecraftPackets::createPacket(static_cast<MinecraftPacketIds>(id));
+            ReadOnlyBinaryStream shortReader(std::span<const std::byte>(bytes).first(bytes.size() - 1));
+            require(!(*truncated)->read(shortReader), name + ": accepted truncated payload");
+        }
         ++count;
     }
     for (const auto& failure : failures) {
         std::cerr << failure << '\n';
     }
     require(failures.empty(), std::to_string(failures.size()) + " interoperability failures");
-    require(count >= 60, "Incomplete reference corpus");
-    std::cout << count << " reference payloads matched and rejected truncation\n";
+    require(count >= 78, "Incomplete reference corpus");
+    std::cout << count << " reference payloads matched; nonempty payloads rejected truncation\n";
 }
 
 void checkIndependentCases() {
-    static_assert(static_cast<int>(CurrentCmdVersion::Latest) == 52);
-    static_assert(static_cast<int>(CurrentCmdVersion::Count) == 53);
+    static_assert(static_cast<int>(CurrentCmdVersion::Latest) == 55);
+    static_assert(static_cast<int>(CurrentCmdVersion::Count) == 56);
     static_assert(static_cast<int>(DisconnectFailReason::UnsupportedTransport) == 149);
     static_assert(static_cast<int>(ServerboundDiagnosticsPacket::MemoryCategory::Persona_Characters) == 58);
     static_assert(static_cast<int>(ServerboundDiagnosticsPacket::MemoryCategory::Gameface_Layout) == 109);
 
-    // r26_u5 uses named attribute operations, optional float constraints, and
+    // r26_u6 uses named attribute operations, optional float constraints, and
     // four Int32 colour channels; the pinned gophertunnel differs on these leaves.
     EnvironmentAttributeData environment;
-    environment.mAttributeName          = "a";
-    environment.mAttribute.mData        = FloatAttributeData{.mValue = 0.75f};
-    environment.mCurrentTransitionTicks = 20;
-    environment.mTotalTransitionTicks   = 100;
-    environment.mEasing                 = EasingFunction::InOutQuad;
-    environment.mLocalTransitionTicks   = 7;
-    environment.mNoiseTransition        = true;
-    environment.mNoiseAlignment.mValue  = 300;
+    environment.mAttributeName = "a";
+    NoiseTransitionAttributeData noise;
+    noise.mFromAttribute.mData              = FloatAttributeData{.mValue = 0.75f};
+    noise.mToAttribute.mData                = FloatAttributeData{.mValue = 1.0f};
+    noise.mSettings.mTotalTransitionTicks   = 100;
+    noise.mSettings.mCurrentTransitionTicks = 20;
+    noise.mSettings.mEasing                 = EasingFunction::InOutQuad;
+    noise.mSettings.mClockName              = "clock";
+    noise.mSettings.mLocalTransitionTicks   = 7;
+    noise.mSettings.mNoiseName              = "noise";
+    noise.mSettings.mNoiseAlignment.mValue  = 300;
+    environment.mPayload                    = noise;
     checkGolden(
         environment,
-        "016100010000403f086f76657272696465000000"
-        "14000000640000000b696e5f6f75745f71756164070000000100ac02",
-        "Environment noise alignment"
+        "016102010000403f086f766572726964650000010000803f086f766572726964650000"
+        "64140405636c6f636b07056e6f69736500ac02",
+        "Noise transition payload"
     );
     ClientboundAttributeLayerSyncPacket environmentPacket;
     UpdateEnvironmentAttributesData     update;
@@ -207,10 +220,51 @@ void checkIndependentCases() {
     environmentPacket.mData.mData = update;
     checkGolden(
         environmentPacket,
-        "0201770101016100010000403f086f76657272696465000000"
-        "14000000640000000b696e5f6f75745f71756164070000000100ac02",
+        "0201770101016102010000403f086f766572726964650000010000803f086f766572726964650000"
+        "64140405636c6f636b07056e6f69736500ac02",
         "Environment packet"
     );
+
+    environment.mPayload = ConstantAttributeData{AttributeData{BoolAttributeData{.mValue = true}}};
+    checkGolden(environment, "0161000001086f76657272696465", "Constant environment payload");
+    TransitionAttributeData transition;
+    transition.mFromAttribute.mData              = BoolAttributeData{.mValue = false};
+    transition.mToAttribute.mData                = BoolAttributeData{.mValue = true};
+    transition.mSettings.mTotalTransitionTicks   = 300;
+    transition.mSettings.mCurrentTransitionTicks = 1;
+    transition.mSettings.mEasing                 = EasingFunction::InOutQuad;
+    transition.mSettings.mClockName              = "c";
+    environment.mPayload                         = transition;
+    checkGolden(
+        environment,
+        "0161010000086f766572726964650001086f76657272696465ac0201040163",
+        "Transition environment payload"
+    );
+    rejects<EnvironmentAttributeData>("016103", "Unknown environment payload");
+    AttributeLayerData layer;
+    layer.mName      = "l";
+    layer.mDimension = -1;
+    layer.mSettings.mWeight = 0.5f;
+    checkGolden(layer, "016c01" "00000000" "0000003f" "0000" "00", "Layer float weight and no noise name");
+
+    // The r26_u6 union includes both a VarUInt index and a UInt8 type literal.
+    using Sound                         = ClientboundUpdateSoundDataPacket::SoundUpdate;
+    const std::string_view soundCases[] = {
+        "13000000000000000000",
+        "130000000000000001010000a03f",
+        "130000000000000002020000a03f",
+        "130000000000000003030000a03f0000003f",
+        "130000000000000004040000a03f",
+        "13000000000000000505",
+        "13000000000000000606"
+    };
+    for (unsigned i = 0; i < 7; ++i) {
+        ClientboundUpdateSoundDataPacket sound;
+        sound.mHandle = 19;
+        sound.mEvent  = Sound{static_cast<Sound::Type>(i), 1.25f, 0.5f};
+        checkGolden(sound, soundCases[i], "Sound event " + std::to_string(i));
+    }
+    rejects<ClientboundUpdateSoundDataPacket>("00000000000000000302", "Mismatched sound event type");
     checkGolden(
         FloatAttributeData{
             .mValue         = 1,
@@ -230,7 +284,7 @@ void checkIndependentCases() {
         "Colour attribute channels"
     );
 
-    // r26_u5 schema: diagnostics adds two independent optionals. Cloudburst omits
+    // r26_u6 schema: diagnostics adds two independent optionals. Cloudburst omits
     // their presence markers, and the pinned gophertunnel does not implement them.
     using Diagnostic = ServerboundDiagnosticsPacket::EntityDiagnosticTimingInfo;
     Diagnostic diagnostic;
@@ -285,7 +339,7 @@ void checkIndependentCases() {
 
     rejects<SubChunkPacket::HeightmapData>("01010f", "Height map row too short");
     rejects<SubChunkPacket::HeightmapData>("010111", "Height map row too long");
-    rejects<ClientboundUpdateSoundDataPacket>("000000000000000007", "Unknown sound update variant");
+    rejects<ClientboundUpdateSoundDataPacket>("00000000000000000707", "Unknown sound update variant");
     rejects<ServerboundPackSettingChangePacket>("000000000000000000000000000000000004", "Unknown pack setting variant");
     SetPlayerFurnaceOptionsPacket furnace;
     furnace.mFurnaceType    = SetPlayerFurnaceOptionsPacket::FurnaceType::Smoker;
@@ -332,15 +386,15 @@ void checkIndependentCases() {
     NetworkItemStackDescriptor air;
     require(encode(air) == unhex("0000000000000000"), "Air stack includes its fixed fields");
 
-    // 2193 uses one optional for score removal.
+    // 2225 uses one optional for score removal.
     SetScorePacket            scores;
     SetScorePacket::ScoreInfo removal;
     removal.mScoreboardId  = 7;
     removal.mObjectiveName = "a";
     scores.mScoresInfo.push_back(removal);
-    require(encode(scores) == unhex("01000672656d6f76650e010161"), "26.50 score removal");
+    require(encode(scores) == unhex("01000672656d6f76650e010161"), "26.60 score removal");
 
-    // Endstone's RedactableString and Mojang's 2193 schema have an optional redacted string.
+    // Endstone's RedactableString and Mojang's 2225 schema have an optional redacted string.
     ItemStackResponseSlotInfo responseSlot;
     responseSlot.mRequestedSlot      = 1;
     responseSlot.mSlot               = 2;
@@ -413,13 +467,13 @@ void checkIndependentCases() {
 } // namespace
 
 int main(int argc, char** argv) {
-    static_assert(getProtocolVersion() == 2193);
-    static_assert(getMinecraftVersion() == "26.50");
+    static_assert(getProtocolVersion() == 2225);
+    static_assert(getMinecraftVersion() == "26.60");
     try {
-        require(argc == 2, "Usage: Protocol2193Tests <reference-corpus>");
+        require(argc == 2, "Usage: Protocol2225Tests <reference-corpus>");
         checkCorpus(argv[1]);
         checkIndependentCases();
-        std::cout << "Protocol 2193 checks passed\n";
+        std::cout << "Protocol 2225 checks passed\n";
         return 0;
     } catch (const std::exception& error) {
         std::cerr << error.what() << '\n';

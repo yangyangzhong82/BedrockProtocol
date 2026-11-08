@@ -27,6 +27,7 @@ void LevelChunkPacket::write(BinaryStream& stream) const {
     stream.writeBool(mCacheEnabled);
     stream.writeArray(mCacheBlobs, &BinaryStream::writeUnsignedInt64);
     stream.writeString(mSerializedChunk);
+    stream.writeBool(mIsClientBiomeUpdate);
 }
 
 Result<> LevelChunkPacket::read(ReadOnlyBinaryStream& stream) {
@@ -40,7 +41,8 @@ Result<> LevelChunkPacket::read(ReadOnlyBinaryStream& stream) {
     }
     _SCULK_READ(stream.readBool(mCacheEnabled));
     _SCULK_READ(stream.readArray(mCacheBlobs, &ReadOnlyBinaryStream::readUnsignedInt64));
-    return stream.readString(mSerializedChunk);
+    _SCULK_READ(stream.readString(mSerializedChunk));
+    return stream.readBool(mIsClientBiomeUpdate);
 }
 
 #ifdef SCULK_PROTOCOL_ENABLE_FORMATTING
@@ -54,7 +56,8 @@ std::string LevelChunkPacket::toString() const {
         SCULK_FORMAT_FIELD(mClientNeedsToRequestSubchunks),
         SCULK_FORMAT_FIELD(mClientRequestSubChunkLimit),
         SCULK_FORMAT_FIELD(mCacheEnabled),
-        SCULK_FORMAT_FIELD(mCacheBlobs)
+        SCULK_FORMAT_FIELD(mCacheBlobs),
+        SCULK_FORMAT_FIELD(mIsClientBiomeUpdate)
     );
 }
 #endif

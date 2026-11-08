@@ -31,6 +31,7 @@ void AddPlayerPacket::write(BinaryStream& stream) const {
     mSynchedProperties.write(stream);
     mAbilities.write(stream);
     stream.writeArray(mActorLinks, &ActorLink::write);
+    stream.writeOptional(mPassengerBlockData, &PassengerOfBlockArguments::write);
     stream.writeString(mDeviceId);
     stream.writeUnsignedInt(mBuildPlatform);
 }
@@ -50,6 +51,7 @@ Result<> AddPlayerPacket::read(ReadOnlyBinaryStream& stream) {
     _SCULK_READ(mSynchedProperties.read(stream));
     _SCULK_READ(mAbilities.read(stream));
     _SCULK_READ(stream.readArray(mActorLinks, &ActorLink::read));
+    _SCULK_READ(stream.readOptional(mPassengerBlockData, &PassengerOfBlockArguments::read));
     _SCULK_READ(stream.readString(mDeviceId));
     return stream.readUnsignedInt(mBuildPlatform);
 }
@@ -59,6 +61,7 @@ std::string AddPlayerPacket::toString() const {
     return SCULK_FORMAT_PACKET(
         SCULK_FORMAT_FIELD(mActorRuntimeId),
         SCULK_FORMAT_FIELD(mActorLinks),
+        SCULK_FORMAT_FIELD(mPassengerBlockData),
         SCULK_FORMAT_FIELD(mName),
         SCULK_FORMAT_FIELD(mUuid),
         SCULK_FORMAT_FIELD(mPlatformOnlineId),

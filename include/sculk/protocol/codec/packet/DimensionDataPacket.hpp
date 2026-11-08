@@ -32,6 +32,8 @@ public:
         std::int32_t  mDimensionType{};
         UUID          mPackId{};
         std::string   mDefaultBiome{};
+        std::int32_t  mCloudHeight{};
+        bool          mRenderClouds{};
 
         void write(BinaryStream& stream) const;
 
